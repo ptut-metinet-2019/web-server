@@ -1,0 +1,28 @@
+{
+  "name": "smsvote-web-server",
+  "version": "1.0.0",
+  "description": "PTUT 2019 web server",
+  "main": "src/main.mjs",
+  "scripts": {
+    "serve": "node --experimental-modules ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptut-metinet-2019/web-server.git"
+  },
+  "author": "Matthieu 'Aeres-Blade' Arques <aeresblade@aeres.games>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ptut-metinet-2019/web-server/issues"
+  },
+  "homepage": "https://github.com/ptut-metinet-2019/web-server#readme",
+  "dependencies": {
+    "@aeres-games/event-emitter": "^1.0.2",
+    "bcrypt": "^3.0.5",
+    "dotenv": "^7.0.0",
+    "js-sha512": "^0.8.0",
+    "mongoose": "^5.4.21",
+    "ws": "^6.2.1"
+  },
+  "devDependencies": {}
+}
