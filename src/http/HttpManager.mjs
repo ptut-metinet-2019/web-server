@@ -13,6 +13,7 @@ import User from '../model/User';
 
 const KEY = fs.readFileSync('storage/cert/server.key');
 const CERT = fs.readFileSync('storage/cert/server.cert');
+const CA = fs.existsSync('storage/cert/server.ca') ? fs.readFileSync('storage/cert/server.ca') : null;
 
 const ROUTES = [
 	{path: '/login', method: 'POST', action: 'login'},
@@ -42,7 +43,8 @@ export default class HttpManager extends EventEmitter
 		this.server = https.createServer(
 		{
 			key: KEY,
-			cert: CERT
+			cert: CERT,
+			ca: CA ? CA : undefined
 		}, (req, res) => that.request(req, res));
 
 		this.server.on('upgrade', (req, socket, head) => that.upgrade(req, socket, head));
