@@ -6,7 +6,8 @@ import bcrypt from 'bcrypt';
 import sha512 from 'js-sha512';
 import EventEmitter from '@aeres-games/event-emitter';
 
-import Client from './Client';
+import Device from './Device';
+import DeviceBridge from './DeviceBridge';
 import StringHelper from '../helper/StringHelper';
 import User from '../model/User';
 
@@ -28,7 +29,7 @@ export default class HttpManager extends EventEmitter
 		this.wss = null;
 
 		this.pending = [];
-		this.clients = [];
+		this.bridges = {};
 	}
 
 	start()
@@ -62,15 +63,15 @@ export default class HttpManager extends EventEmitter
 		if(this.server === null)
 			return;
 
-		this.server.close(function()
+		this.wss.close(function()
 		{
-			that.server = null;
-			that.pending = [];
+			that.wss = null;
+			that.clients = [];
 
-			that.wss.close(function()
+			that.server.close(function()
 			{
-				that.wss = null;
-				that.clients = [];
+				that.server = null;
+				that.pending = [];
 
 				that.notify('close', {});
 			});
@@ -165,29 +166,54 @@ export default class HttpManager extends EventEmitter
 			return;
 		}
 
-		var userId = null;
+		// TODO : Brute force checking
+		// TODO : Time checking
+
+		var user = null;
 		for(var i in this.pending)
 		{
 			if(this.pending[i].token === queryParameters.token)
 			{
 				this.pending[i].socket = socket;
-				userId = this.pending[i].id;
+				user = this.pending[i].user;
 				break;
 			}
 		}
 
-		if(!userId)
+		if(!user)
 		{
 			socket.destroy();
 			return;
 		}
 
-		this.notify('info', {message: 'User #' + userId + ' authenticated'});
+		this.notify('info', {message: 'User #' + user.id + ' authenticated'});
 	}
 
 	connection(ws, req)
 	{
-		// req.socket === socket de upgrade() => pour récup le userId
+		var connection = null;
+		for(var i in this.pending)
+		{
+			if(this.pending[i].socket === req.socket)
+			{
+				connection = this.pending[i];
+				this.pending.slice(i, 1);
+				break;
+			}
+		}
+
+		if(!connection)
+		{
+			that.notify('warn', {message: 'Socket not found after upgrade'});
+
+			ws.close(500, 'Internal Server Error');
+			return;
+		}
+
+		if(!this.bridges[connection.user.id])
+			this.bridges[connection.user.id] = new DeviceBridge(connection.user);
+
+		this.bridges[connection.user.id].bindDevice(new Device(req, ws));
 	}
 
 	login(req, res, body)
@@ -254,7 +280,7 @@ export default class HttpManager extends EventEmitter
 				}
 
 				var token = sha512.sha512(req.socket.remoteAddress + Math.random());
-				that.pending.push({id: user.id, token: token, time: new Date()});
+				that.pending.push({user: user, token: token, time: new Date(), socket: null});
 
 				res.writeHead(200, {'Content-Type': 'application/json'});
 				res.end(JSON.stringify({token: token}));
@@ -293,6 +319,8 @@ export default class HttpManager extends EventEmitter
 			res.end(JSON.stringify({error: 'Invalid email address'}));
 			return;
 		}
+
+		// TODO : Brute force checking
 
 		User.findOne({email: body.data.email}, function(error, user)
 		{
@@ -336,7 +364,7 @@ export default class HttpManager extends EventEmitter
 					}
 
 					var token = sha512.sha512(req.socket.remoteAddress + Math.random());
-					that.pending.push({id: user.id, token: token, time: new Date()});
+					that.pending.push({user: user, token: token, time: new Date(), socket: null});
 
 					res.writeHead(200, {'Content-Type': 'application/json'});
 					res.end(JSON.stringify({token: token}));
