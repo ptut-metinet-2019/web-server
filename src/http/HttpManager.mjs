@@ -84,7 +84,7 @@ export default class HttpManager extends EventEmitter
 	{
 		if(req.method === 'OPTIONS')
 		{
-			res.writeHead(404, this.generateHeaders());
+			res.writeHead(200, this.generateHeaders());
 			res.end();
 			return;
 		}
