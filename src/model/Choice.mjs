@@ -2,8 +2,6 @@ import Mongoose from 'mongoose';
 
 const ChoiceSchema = new Mongoose.Schema(
 {
-	id: 		{type: Mongoose.Schema.Types.ObjectId, index: true, required: true, auto: true},
-
 	questionId: {type: Mongoose.Schema.Types.ObjectId, ref: 'Question', required: true},
 	title: 		{type: String, required: true},
 

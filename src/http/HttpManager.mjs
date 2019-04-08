@@ -195,7 +195,7 @@ export default class HttpManager extends EventEmitter
 			return;
 		}
 
-		this.notify('info', {message: 'User #' + user.id + ' authenticated'});
+		this.notify('info', {message: 'User #' + user._id + ' authenticated'});
 	}
 
 	connection(ws, req)
@@ -219,10 +219,10 @@ export default class HttpManager extends EventEmitter
 			return;
 		}
 
-		if(!this.bridges[connection.user.id])
-			this.bridges[connection.user.id] = new DeviceBridge(connection.user);
+		if(!this.bridges[connection.user._id])
+			this.bridges[connection.user._id] = new DeviceBridge(connection.user);
 
-		this.bridges[connection.user.id].bindDevice(new Device(req, ws));
+		this.bridges[connection.user._id].bindDevice(new Device(req, ws));
 	}
 
 	login(req, res, body)

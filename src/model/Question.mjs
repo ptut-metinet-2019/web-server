@@ -2,8 +2,6 @@ import Mongoose from 'mongoose';
 
 const QuestionSchema = new Mongoose.Schema(
 {
-	id: 				{type: Mongoose.Schema.Types.ObjectId, index: true, required: true, auto: true},
-
 	questionnaireId: 	{type: Mongoose.Schema.Types.ObjectId, ref: 'Questionnaire', required: true},
 	title: 				{type: String, required: true},
 	type: 				{type: String, required: true},
