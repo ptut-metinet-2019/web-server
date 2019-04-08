@@ -96,7 +96,7 @@ export default class HttpManager extends EventEmitter
 
 		if(!found)
 		{
-			res.writeHead(404, {'Content-Type': 'application/json'});
+			res.writeHead(404, that.generateHeaders());
 			res.end(JSON.stringify({error: 'No route found for ' + req.method + ' ' + req.url}));
 
 			this.notify('info', {message: '404 - ' + req.method + ' ' + req.url});
@@ -105,7 +105,7 @@ export default class HttpManager extends EventEmitter
 
 		req.on('error', function(error)
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, that.generateHeaders());
 			res.end(JSON.stringify({error: 'Request stream error'}));
 
 			that.notify('info', {message: '400 - Request Error : ' + req.method + ' ' + req.url});
@@ -122,7 +122,7 @@ export default class HttpManager extends EventEmitter
 
 				if(req.headers['content-length'] && data.length !== parseInt(req.headers['content-length']))
 				{
-					res.writeHead(400, {'Content-Type': 'application/json'});
+					res.writeHead(400, that.generateHeaders());
 					res.end(JSON.stringify({error: 'Content-Length value and actual content length mismatch'}));
 					return;
 				}
@@ -142,7 +142,7 @@ export default class HttpManager extends EventEmitter
 						try {data = JSON.parse(data);}
 						catch(error)
 						{
-							res.writeHead(400, {'Content-Type': 'application/json'});
+							res.writeHead(400, that.generateHeaders());
 							res.end(JSON.stringify({error: 'JSON parsing error'}));
 							return;
 						}
@@ -224,21 +224,21 @@ export default class HttpManager extends EventEmitter
 
 		if(body.type !== 'json')
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, that.generateHeaders());
 			res.end(JSON.stringify({error: 'Content must be JSON-encodded'}));
 			return;
 		}
 
 		if(typeof body.data.email !== 'string')
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, that.generateHeaders());
 			res.end(JSON.stringify({error: 'Missing email property'}));
 			return;
 		}
 
 		if(typeof body.data.password !== 'string')
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, that.generateHeaders());
 			res.end(JSON.stringify({error: 'Missing password property'}));
 			return;
 		}
@@ -249,7 +249,7 @@ export default class HttpManager extends EventEmitter
 		{
 			if(error)
 			{
-				res.writeHead(500, {'Content-Type': 'application/json'});
+				res.writeHead(500, that.generateHeaders());
 				res.end(JSON.stringify({error: 'Internal Server Error'}));
 
 				that.notify('warn', {message: 'Couldn\'t execute select query', error});
@@ -258,7 +258,7 @@ export default class HttpManager extends EventEmitter
 
 			if(!user)
 			{
-				res.writeHead(401, {'Content-Type': 'application/json'});
+				res.writeHead(401, that.generateHeaders());
 				res.end(JSON.stringify({error: 'Invalid email or password'}));
 				return;
 			}
@@ -267,7 +267,7 @@ export default class HttpManager extends EventEmitter
 			{
 				if(error)
 				{
-					res.writeHead(500, {'Content-Type': 'application/json'});
+					res.writeHead(500, that.generateHeaders());
 					res.end(JSON.stringify({error: 'Internal Server Error'}));
 
 					that.notify('warn', {message: 'Couldn\'t compare password hash', error});
@@ -276,7 +276,7 @@ export default class HttpManager extends EventEmitter
 
 				if(!ok)
 				{
-					res.writeHead(401, {'Content-Type': 'application/json'});
+					res.writeHead(401, that.generateHeaders());
 					res.end(JSON.stringify({error: 'Invalid email or password'}));
 					return;
 				}
@@ -284,7 +284,7 @@ export default class HttpManager extends EventEmitter
 				var token = sha512.sha512(req.socket.remoteAddress + Math.random());
 				that.pending.push({user: user, token: token, time: new Date(), socket: null});
 
-				res.writeHead(200, {'Content-Type': 'application/json'});
+				res.writeHead(200, that.generateHeaders());
 				res.end(JSON.stringify({token: token}));
 			});
 		});
@@ -296,28 +296,28 @@ export default class HttpManager extends EventEmitter
 
 		if(body.type !== 'json')
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, this.generateHeaders());
 			res.end(JSON.stringify({error: 'Content must be JSON-encodded'}));
 			return;
 		}
 
 		if(typeof body.data.email !== 'string')
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, this.generateHeaders());
 			res.end(JSON.stringify({error: 'Missing email property'}));
 			return;
 		}
 
 		if(typeof body.data.password !== 'string')
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, this.generateHeaders());
 			res.end(JSON.stringify({error: 'Missing password property'}));
 			return;
 		}
 
 		if(!StringHelper.isValidEmail(body.data.email))
 		{
-			res.writeHead(400, {'Content-Type': 'application/json'});
+			res.writeHead(400, this.generateHeaders());
 			res.end(JSON.stringify({error: 'Invalid email address'}));
 			return;
 		}
@@ -328,7 +328,7 @@ export default class HttpManager extends EventEmitter
 		{
 			if(error)
 			{
-				res.writeHead(500, {'Content-Type': 'application/json'});
+				res.writeHead(500, that.generateHeaders());
 				res.end(JSON.stringify({error: 'Internal Server Error'}));
 
 				that.notify('warn', {message: 'Couldn\'t execute select query', error});
@@ -337,7 +337,7 @@ export default class HttpManager extends EventEmitter
 
 			if(user)
 			{
-				res.writeHead(409, {'Content-Type': 'application/json'});
+				res.writeHead(409, that.generateHeaders());
 				res.end(JSON.stringify({error: 'Email address already taken'}));
 				return;
 			}
@@ -346,7 +346,7 @@ export default class HttpManager extends EventEmitter
 			{
 				if(error)
 				{
-					res.writeHead(500, {'Content-Type': 'application/json'});
+					res.writeHead(500, that.generateHeaders());
 					res.end(JSON.stringify({error: 'Internal Server Error'}));
 
 					that.notify('warn', {message: 'Couldn\'t hash password', error});
@@ -358,7 +358,7 @@ export default class HttpManager extends EventEmitter
 				{
 					if(error)
 					{
-						res.writeHead(500, {'Content-Type': 'application/json'});
+						res.writeHead(500, that.generateHeaders());
 						res.end(JSON.stringify({error: 'Internal Server Error'}));
 
 						that.notify('warn', {message: 'Couldn\'t execute insert query', error});
@@ -368,10 +368,22 @@ export default class HttpManager extends EventEmitter
 					var token = sha512.sha512(req.socket.remoteAddress + Math.random());
 					that.pending.push({user: user, token: token, time: new Date(), socket: null});
 
-					res.writeHead(200, {'Content-Type': 'application/json'});
+					res.writeHead(200, that.generateHeaders());
 					res.end(JSON.stringify({token: token}));
 				});
 			});
 		});
+	}
+
+	generateHeaders(others = {})
+	{
+		var headers = {
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': 'http://localhost:4200',
+			'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+			'Access-Control-Allow-Headers': 'Content-Type, Content-Length'
+		};
+
+		return Object.assign(headers, others);
 	}
 }
