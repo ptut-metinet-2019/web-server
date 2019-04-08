@@ -86,6 +86,7 @@ export default class HttpManager extends EventEmitter
 		{
 			res.writeHead(404, this.generateHeaders());
 			res.end();
+			return;
 		}
 
 		var that = this;
