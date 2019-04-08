@@ -21,6 +21,28 @@ export default class DeviceBridge extends EventEmitter
 	{
 		var that = this;
 
+		device.on('info', (event) => that.notify('info', event));
+		device.on('warn', (event) => that.notify('warn', event));
+		device.on('error', (event) => that.notify('error', event));
+
+		device.on('close', function(event)
+		{
+			that.notify('info', {message: 'User #' + that.user._id + ' device closed'});
+
+			for(var i in that.devices)
+			{
+				if(that.devices[i] === event.device)
+				{
+					that.devices.splice(i, 1);
+
+					if(that.devices.length === 0)
+						that.notify('empty', {bridge: that});
+
+					break;
+				}
+			}
+		});
+
 		device.on('request', function(event)
 		{
 			var controller = null;
@@ -36,20 +58,24 @@ export default class DeviceBridge extends EventEmitter
 
 			if(!controller)
 			{
-				console.log('TODO : invalid target');
+				event.request.device.sendResponse(new Response(event.request, 404, {error: 'Unknown target controller'}));
+				that.notify('warn', {message: 'Unknown target controller ' + event.request.target});
 				return;
 			}
 
-			if(!(['all', 'find', 'create', 'update', 'delete']).includes(event.request.action) || typeof controller[event.request.action] !== 'function')
+			if(typeof controller[event.request.action + 'Action'] !== 'function')
 			{
-				console.log('TODO : invalid action');
+				event.request.device.sendResponse(new Response(event.request, 404, {error: 'Unknown action method'}));
+				that.notify('warn', {message: 'Unknown action method ' + event.request.action});
 				return;
 			}
 
-			controller[event.request.action](event.request, function(result)
+			controller[event.request.action + 'Action'](event.request, function(result)
 			{
 				if(result instanceof Response)
 					event.request.device.sendResponse(result);
+				else
+					event.request.device.sendResponse(new Response(event.request, 204, {}));
 			});
 		});
 

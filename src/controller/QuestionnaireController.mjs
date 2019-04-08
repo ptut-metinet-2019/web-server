@@ -9,7 +9,7 @@ export default class QuestionnaireController
 		this.bridge = bridge;
 	}
 
-	all(request, callback)
+	allAction(request, callback)
 	{
 		Questionnaire.find({userId: this.bridge.user._id, deleted: null}, function(error, questionnaires)
 		{
@@ -23,7 +23,7 @@ export default class QuestionnaireController
 		});
 	}
 
-	create(request, callback)
+	createAction(request, callback)
 	{
 		var that = this;
 
@@ -43,12 +43,12 @@ export default class QuestionnaireController
 		});
 	}
 
-	update(request, callback)
+	updateAction(request, callback)
 	{
 		console.log('update');
 	}
 
-	delete(request, callback)
+	deleteAction(request, callback)
 	{
 		var that = this;
 

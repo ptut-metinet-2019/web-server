@@ -195,12 +195,14 @@ export default class HttpManager extends EventEmitter
 			return;
 		}
 
-		this.notify('info', {message: 'User #' + user._id + ' authenticated'});
+		this.notify('info', {message: 'User #' + user._id + ' authenticated with new device'});
 	}
 
 	connection(ws, req)
 	{
 		var connection = null;
+		var that = this;
+
 		for(var i in this.pending)
 		{
 			if(this.pending[i].socket === req.socket)
@@ -220,7 +222,21 @@ export default class HttpManager extends EventEmitter
 		}
 
 		if(!this.bridges[connection.user._id])
+		{
 			this.bridges[connection.user._id] = new DeviceBridge(connection.user);
+			this.notify('info', {message: 'Bridge created for User #' + connection.user._id});
+
+			this.bridges[connection.user._id].on('info', (event) => that.notify('info', event));
+			this.bridges[connection.user._id].on('warn', (event) => that.notify('warn', event));
+			this.bridges[connection.user._id].on('error', (event) => that.notify('error', event));
+
+			this.bridges[connection.user._id].on('empty', function(event)
+			{
+				delete that.bridges[event.bridge.user._id];
+
+				that.notify('info', {message: 'Bridge deleted for User #' + connection.user._id + ' (empty)'});
+			});
+		}
 
 		this.bridges[connection.user._id].bindDevice(new Device(req, ws));
 	}

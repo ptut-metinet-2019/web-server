@@ -12,6 +12,13 @@ export default class Device extends EventEmitter
 		this.request = request;
 		this.ws = ws;
 
+		this.ws.on('error', (error) => that.notify('warn', {message: 'A Websocket error occured', error}));
+
+		this.ws.on('close', function(code, reason)
+		{
+			that.notify('close', {code, reason, device: that});
+		});
+
 		this.ws.on('message', function(message)
 		{
 			try
@@ -20,13 +27,13 @@ export default class Device extends EventEmitter
 			}
 			catch(error)
 			{
-				console.log('TODO : invalid json');
+				that.notify('warn', {message: 'Couldn\'t parse message JSON', error});
 				return;
 			}
 
 			if(typeof message.type !== 'string')
 			{
-				console.log('TODO : invalid type');
+				that.notify('warn', {message: 'Invalid / Missing message type'});
 				return;
 			}
 
@@ -34,19 +41,19 @@ export default class Device extends EventEmitter
 			{
 				if(typeof message.id !== 'string')
 				{
-					console.log('TODO : invalid id');
+					that.notify('warn', {message: 'Invalid / Missing request id'});
 					return;
 				}
 
 				if(typeof message.target !== 'string')
 				{
-					console.log('TODO : invalid target');
+					that.notify('warn', {message: 'Invalid / Missing request target'});
 					return;
 				}
 
 				if(typeof message.action !== 'string')
 				{
-					console.log('TODO : invalid action');
+					that.notify('warn', {message: 'Invalid / Missing request action'});
 					return;
 				}
 
@@ -54,7 +61,7 @@ export default class Device extends EventEmitter
 			}
 			else
 			{
-				console.log('TODO : unknown type');
+				that.notify('warn', {message: 'Unknown message type ' + message.type});
 			}
 		});
 	}
