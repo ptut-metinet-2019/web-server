@@ -58,7 +58,7 @@ export default class DeviceBridge extends EventEmitter
 
 	broadcast(event)
 	{
-		var message = JSON.stringify({type: 'event', target: event.target, action: event.action, data: response.data});
+		var message = JSON.stringify({type: 'event', target: event.target, action: event.action, data: event.data});
 
 		for(var device of this.devices)
 			device.ws.send(message);
