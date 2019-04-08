@@ -54,7 +54,7 @@ export default class QuestionnaireController
 
 		//TODO validation
 
-		Questionnaire.findOne({id: request.data.id, userId: this.bridge.user.id, deleted: null}, function(error, questionnaire)
+		Questionnaire.findOne({_id: request.data.id, userId: this.bridge.user.id, deleted: null}, function(error, questionnaire)
 		{
 			if(error)
 			{
