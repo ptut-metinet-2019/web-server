@@ -58,7 +58,13 @@ export default class QuestionnaireController
 		{
 			if(error)
 			{
-				console.error('todo questionnaire not found');
+				console.error('todo questionnaire find error');
+				return;
+			}
+
+			if(questionnaire === null)
+			{
+				console.log('todo questionnaire not found');
 				return;
 			}
 
