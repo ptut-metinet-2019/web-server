@@ -1,5 +1,6 @@
 import Questionnaire from '../model/Questionnaire';
 import Response from '../http/Response';
+import Event from '../http/Event';
 
 export default class QuestionnaireController
 {
@@ -24,6 +25,8 @@ export default class QuestionnaireController
 
 	create(request, callback)
 	{
+		var that = this;
+
 		//TODO validation
 
 		var questionnaire = new Questionnaire({userId: this.bridge.user.id, name: request.data.name, timer: request.data.timer, autoplayTimeout: request.data.autoplayTimeout});
@@ -35,9 +38,8 @@ export default class QuestionnaireController
 				return;
 			}
 
+			that.bridge.broadcast(new Event('questionnaire', 'create', questionnaire));
 			callback(new Response(request, 204));
-
-			// TODO : broadcast
 		});
 	}
 
