@@ -11,7 +11,7 @@ export default class QuestionnaireController
 
 	all(request, callback)
 	{
-		Questionnaire.find({userId: this.bridge.user.id}, function(error, questionnaires)
+		Questionnaire.find({userId: this.bridge.user.id, deleted: null}, function(error, questionnaires)
 		{
 			if(error)
 			{
@@ -50,6 +50,30 @@ export default class QuestionnaireController
 
 	delete(request, callback)
 	{
-		console.log('delete');
+		var that = this;
+
+		//TODO validation
+
+		Questionnaire.findOne({id: request.data.id, userId: this.bridge.user.id, deleted: null}, function(error, questionnaire)
+		{
+			if(error)
+			{
+				//TODO
+				return;
+			}
+
+			questionnaire.deleted = Date.now;
+			questionnaire.save(function(error, questionnaire)
+			{
+				if(error)
+				{
+					//TODO
+					return;
+				}
+
+				that.bridge.broadcast(new Event('questionnaire', 'delete', {id: questionnaire.id}));
+				callback(new Response(request, 204));
+			});
+		});
 	}
 }
