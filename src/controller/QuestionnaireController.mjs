@@ -62,7 +62,7 @@ export default class QuestionnaireController
 				return;
 			}
 
-			questionnaire.deleted = Date.now;
+			questionnaire.deleted = Date.now();
 			questionnaire.save(function(error, questionnaire)
 			{
 				if(error)
