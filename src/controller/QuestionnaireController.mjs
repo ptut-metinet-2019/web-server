@@ -58,7 +58,7 @@ export default class QuestionnaireController
 		{
 			if(error)
 			{
-				//TODO
+				console.error('todo questionnaire not found');
 				return;
 			}
 
@@ -67,7 +67,7 @@ export default class QuestionnaireController
 			{
 				if(error)
 				{
-					//TODO
+					console.error('todo questionnaire not saved');
 					return;
 				}
 
