@@ -67,7 +67,7 @@ export default class QuestionnaireController
 			{
 				if(error)
 				{
-					console.error('todo questionnaire not saved');
+					console.error(error);
 					return;
 				}
 
