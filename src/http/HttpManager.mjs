@@ -208,7 +208,7 @@ export default class HttpManager extends EventEmitter
 			if(this.pending[i].socket === req.socket)
 			{
 				connection = this.pending[i];
-				this.pending.slice(i, 1);
+				this.pending.splice(i, 1);
 				break;
 			}
 		}

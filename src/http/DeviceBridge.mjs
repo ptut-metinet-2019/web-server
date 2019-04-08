@@ -27,7 +27,7 @@ export default class DeviceBridge extends EventEmitter
 
 		device.on('close', function(event)
 		{
-			that.notify('info', {message: 'User #' + that.user._id + ' device closed'});
+			that.notify('info', {message: 'User #' + that.user._id + ' device connection closed'});
 
 			for(var i in that.devices)
 			{
