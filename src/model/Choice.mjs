@@ -8,6 +8,14 @@ const ChoiceSchema = new Mongoose.Schema(
 	created: 	{type: Date, default: Date.now},
 	updated: 	{type: Date, default: Date.now},
 	deleted: 	{type: Date, default: null}
+},{
+	toJSON:
+	{
+		transform: function(document, result)
+		{
+			delete result.deleted;
+		}
+	}
 });
 
 export default Mongoose.model('Choice', ChoiceSchema);

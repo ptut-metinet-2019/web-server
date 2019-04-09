@@ -308,7 +308,7 @@ export default class HttpManager extends EventEmitter
 				that.pending.push({user: user, token: token, time: new Date(), socket: null});
 
 				res.writeHead(200, that.generateHeaders());
-				res.end(JSON.stringify({token: token}));
+				res.end(JSON.stringify({token, user}));
 			});
 		});
 	}
@@ -392,7 +392,7 @@ export default class HttpManager extends EventEmitter
 					that.pending.push({user: user, token: token, time: new Date(), socket: null});
 
 					res.writeHead(200, that.generateHeaders());
-					res.end(JSON.stringify({token: token}));
+					res.end(JSON.stringify({token, user}));
 				});
 			});
 		});

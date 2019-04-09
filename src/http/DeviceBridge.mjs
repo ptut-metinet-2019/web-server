@@ -8,6 +8,7 @@ export default class DeviceBridge extends EventEmitter
 	constructor(user)
 	{
 		super();
+		var that = this;
 
 		this.user = user;
 		this.devices = [];
@@ -15,6 +16,13 @@ export default class DeviceBridge extends EventEmitter
 		this.controllers = {
 			'questionnaire': new QuestionnaireController(this)
 		};
+
+		for(var controller of Object.values(this.controllers))
+		{
+			controller.on('info', (event) => that.notify('info', event));
+			controller.on('warn', (event) => that.notify('warn', event));
+			controller.on('error', (event) => that.notify('error', event));
+		}
 	}
 
 	bindDevice(device)

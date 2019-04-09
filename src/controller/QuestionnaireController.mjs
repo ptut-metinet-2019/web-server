@@ -1,21 +1,27 @@
+import Controller from './Controller';
 import Questionnaire from '../model/Questionnaire';
 import Response from '../http/Response';
 import Event from '../http/Event';
 
-export default class QuestionnaireController
+export default class QuestionnaireController extends Controller
 {
 	constructor(bridge)
 	{
+		super();
+
 		this.bridge = bridge;
 	}
 
 	allAction(request, callback)
 	{
+		var that = this;
+
 		Questionnaire.find({userId: this.bridge.user._id, deleted: null}, function(error, questionnaires)
 		{
 			if(error)
 			{
-				//TODO
+				callback(new Response(request), 500, {error: 'Internal Server Error'});
+				that.notify('warn', {message: 'Couldn\'t retrieve questionnaires list', error});
 				return;
 			}
 
@@ -27,14 +33,15 @@ export default class QuestionnaireController
 	{
 		var that = this;
 
-		//TODO validation
+		// todo validation
 
 		var questionnaire = new Questionnaire({userId: this.bridge.user._id, name: request.data.name, timer: request.data.timer, autoplayTimeout: request.data.autoplayTimeout});
 		questionnaire.save(function(error, questionnaire)
 		{
 			if(error)
 			{
-				//TODO
+				callback(new Response(request), 500, {error: 'Internal Server Error'});
+				that.notify('warn', {message: 'Error creating questionnaire', error});
 				return;
 			}
 
