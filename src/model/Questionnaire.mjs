@@ -4,8 +4,8 @@ const QuestionnaireSchema = new Mongoose.Schema(
 {
 	userId: 			{type: Mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
 	name: 				{type: String, required: true},
-	timer: 				Number,
-	autoplayTimeout: 	Number,
+	timer: 				{type: Number, required: true},
+	autoplayTimeout: 	{type: Number, required: true},
 
 	created: 			{type: Date, default: Date.now},
 	updated: 			{type: Date, default: Date.now},

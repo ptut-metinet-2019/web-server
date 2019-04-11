@@ -3,6 +3,12 @@ import Questionnaire from '../model/Questionnaire';
 import Response from '../http/Response';
 import Event from '../http/Event';
 
+import Validator from '../validation/Validator';
+import ValidationError from '../validation/ValidationError';
+import ObjectRule from '../validation/ObjectRule';
+import StringRule from '../validation/StringRule';
+import NumberRule from '../validation/NumberRule';
+
 export default class QuestionnaireController extends Controller
 {
 	constructor(bridge)
@@ -10,6 +16,16 @@ export default class QuestionnaireController extends Controller
 		super();
 
 		this.bridge = bridge;
+
+		this.createValidator = new Validator(new ObjectRule({
+			name: new StringRule({minLength: 3, maxLength: 45}),
+			timer: new NumberRule({min: 0, max: 86400}),
+			autoplayTimeout: new NumberRule({min: 0, max: 86400})
+		}));
+
+		this.deleteValidator = new Validator(new ObjectRule({
+			_id: new StringRule({minLength: 1})
+		}));
 	}
 
 	allAction(request, callback)
@@ -20,7 +36,7 @@ export default class QuestionnaireController extends Controller
 		{
 			if(error)
 			{
-				callback(new Response(request), 500, {error: 'Internal Server Error'});
+				callback(new Response(request, 500, {error: 'Internal Server Error'}));
 				that.notify('warn', {message: 'Couldn\'t retrieve questionnaires list', error});
 				return;
 			}
@@ -33,14 +49,19 @@ export default class QuestionnaireController extends Controller
 	{
 		var that = this;
 
-		// todo validation
+		try {this.createValidator.validate(request.data);}
+		catch(error)
+		{
+			callback(new Response(request, 400, {error: error.message}));
+			return;
+		}
 
 		var questionnaire = new Questionnaire({userId: this.bridge.user._id, name: request.data.name, timer: request.data.timer, autoplayTimeout: request.data.autoplayTimeout});
 		questionnaire.save(function(error, questionnaire)
 		{
 			if(error)
 			{
-				callback(new Response(request), 500, {error: 'Internal Server Error'});
+				callback(new Response(request, 500, {error: 'Internal Server Error'}));
 				that.notify('warn', {message: 'Error creating questionnaire', error});
 				return;
 			}
@@ -59,7 +80,12 @@ export default class QuestionnaireController extends Controller
 	{
 		var that = this;
 
-		//TODO validation
+		try {this.deleteValidator.validate(request.data);}
+		catch(error)
+		{
+			callback(new Response(request, 400, {error: error.message}));
+			return;
+		}
 
 		Questionnaire.findOne({_id: request.data._id, userId: this.bridge.user._id, deleted: null}, function(error, questionnaire)
 		{
