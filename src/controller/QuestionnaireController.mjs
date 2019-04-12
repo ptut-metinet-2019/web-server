@@ -92,7 +92,8 @@ export default class QuestionnaireController extends Controller
 		var data = {
 			name: request.data.name,
 			timer: request.data.timer,
-			autoplayTimeout: request.data.autoplayTimeout
+			autoplayTimeout: request.data.autoplayTimeout,
+			updated: Date.now()
 		};
 
 		Questionnaire.findOneAndUpdate({_id: request.data._id, userId: this.bridge.user._id, deleted: null}, data, {new: true}, function(error, questionnaire)
