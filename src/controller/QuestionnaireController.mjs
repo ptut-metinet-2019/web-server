@@ -23,6 +23,13 @@ export default class QuestionnaireController extends Controller
 			autoplayTimeout: new NumberRule({min: 0, max: 86400})
 		}));
 
+		this.updateValidator = new Validator(new ObjectRule({
+			_id: new StringRule({minLength: 1}),
+			name: new StringRule({minLength: 3, maxLength: 45}),
+			timer: new NumberRule({min: 0, max: 86400}),
+			autoplayTimeout: new NumberRule({min: 0, max: 86400})
+		}));
+
 		this.deleteValidator = new Validator(new ObjectRule({
 			_id: new StringRule({minLength: 1})
 		}));
@@ -67,13 +74,45 @@ export default class QuestionnaireController extends Controller
 			}
 
 			that.bridge.broadcast(new Event('questionnaire', 'create', questionnaire));
-			callback(new Response(request, 204));
+			callback(new Response(request, 200, questionnaire));
 		});
 	}
 
 	updateAction(request, callback)
 	{
-		console.log('update');
+		var that = this;
+
+		try {this.updateValidator.validate(request.data);}
+		catch(error)
+		{
+			callback(new Response(request, 400, {error: error.message}));
+			return;
+		}
+
+		var data = {
+			name: request.data.name,
+			timer: request.data.timer,
+			autoplayTimeout: request.data.autoplayTimeout
+		};
+
+		Questionnaire.findOneAndUpdate({_id: request.data._id, userId: this.bridge.user._id, deleted: null}, data, {new: true}, function(error, questionnaire)
+		{
+			if(error)
+			{
+				callback(new Response(request, 500, {error: 'Internal Server Error'}));
+				that.notify('warn', {message: 'Error finding and updating questionnaire', error});
+				return;
+			}
+
+			if(questionnaire === null)
+			{
+				callback(new Response(request, 404, {error: 'Questionnaire Not Found'}));
+				return;
+			}
+
+			that.bridge.broadcast(new Event('questionnaire', 'update', questionnaire));
+			callback(new Response(request, 200, questionnaire));
+		});
 	}
 
 	deleteAction(request, callback)
@@ -87,32 +126,23 @@ export default class QuestionnaireController extends Controller
 			return;
 		}
 
-		Questionnaire.findOne({_id: request.data._id, userId: this.bridge.user._id, deleted: null}, function(error, questionnaire)
+		Questionnaire.findOneAndUpdate({_id: request.data._id, userId: this.bridge.user._id, deleted: null}, {deleted: Date.now()}, {new: true}, function(error, questionnaire)
 		{
 			if(error)
 			{
-				console.error('todo questionnaire find error');
+				callback(new Response(request, 500, {error: 'Internal Server Error'}));
+				that.notify('warn', {message: 'Error finding and deleting questionnaire', error});
 				return;
 			}
 
 			if(questionnaire === null)
 			{
-				console.log('todo questionnaire not found ' + request.data._id);
+				callback(new Response(request, 404, {error: 'Questionnaire Not Found'}));
 				return;
 			}
 
-			questionnaire.deleted = Date.now();
-			questionnaire.save(function(error, questionnaire)
-			{
-				if(error)
-				{
-					console.error(error);
-					return;
-				}
-
-				that.bridge.broadcast(new Event('questionnaire', 'delete', {_id: questionnaire._id}));
-				callback(new Response(request, 204));
-			});
+			that.bridge.broadcast(new Event('questionnaire', 'delete', {_id: questionnaire._id}));
+			callback(new Response(request, 204));
 		});
 	}
 }
