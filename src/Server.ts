@@ -1,6 +1,6 @@
 import {EventEmitter} from '@aeres-games/event-emitter';
 import {DatabaseManager} from './DatabaseManager';
-import {HttpManager} from './http/HttpManager';
+import {HttpManager} from './Http/HttpManager';
 
 export class Server extends EventEmitter
 {
