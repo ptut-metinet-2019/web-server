@@ -2,9 +2,11 @@
   "name": "smsvote-web-server",
   "version": "1.0.0",
   "description": "PTUT 2019 web server",
-  "main": "src/main.mjs",
+  "main": "dist/main.js",
   "scripts": {
-    "serve": "node --experimental-modules ."
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean-build": "rimraf ./dist && tsc"
   },
   "repository": {
     "type": "git",
@@ -17,12 +19,20 @@
   },
   "homepage": "https://github.com/ptut-metinet-2019/web-server#readme",
   "dependencies": {
-    "@aeres-games/event-emitter": "^1.0.2",
+    "@aeres-games/event-emitter": "^1.1.0",
     "bcrypt": "^3.0.5",
     "dotenv": "^7.0.0",
     "js-sha512": "^0.8.0",
     "mongoose": "^5.4.21",
     "ws": "^6.2.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/dotenv": "^6.1.1",
+    "@types/mongoose": "^5.3.27",
+    "@types/node": "^11.13.8",
+    "@types/ws": "^6.0.1",
+    "rimraf": "^2.6.3",
+    "typescript": "^3.4.5"
+  }
 }
