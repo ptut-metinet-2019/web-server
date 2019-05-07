@@ -2,7 +2,6 @@ import * as Mongoose from 'mongoose';
 
 import {Controller, IControllerAction, IControllerRequest} from './Controller';
 import {Questionnaire, IQuestionnaireModel} from '../Model/Questionnaire';
-import {Question, IQuestionModel} from '../Model/Question';
 import {Response} from '../Http/Response';
 import {Event} from '../Http/Event';
 
@@ -12,11 +11,6 @@ import {ValidationError} from '../Error/ValidationError';
 import {ObjectRule} from '../Validation/Rule/ObjectRule';
 import {StringRule} from '../Validation/Rule/StringRule';
 import {NumberRule} from '../Validation/Rule/NumberRule';
-
-export interface IQuestionnaireGetQuestionsData
-{
-	_id				: string;
-}
 
 export interface IQuestionnaireCreateData
 {
@@ -40,7 +34,6 @@ export interface IQuestionnaireDeleteData
 
 export class QuestionnaireController extends Controller
 {
-	private getQuestionsValidator	: Validator;
 	private createValidator			: Validator;
 	private updateValidator			: Validator;
 	private deleteValidator			: Validator;
@@ -48,10 +41,6 @@ export class QuestionnaireController extends Controller
 	public constructor()
 	{
 		super();
-
-		this.getQuestionsValidator = new Validator(new ObjectRule({
-			_id: new StringRule({minLength: 1})
-		}));
 
 		this.createValidator = new Validator(new ObjectRule({
 			name: new StringRule({minLength: 3, maxLength: 45}),
@@ -88,50 +77,6 @@ export class QuestionnaireController extends Controller
 		});
 	}
 
-	public getQuestionsAction(request: IControllerRequest, action: IControllerAction): void
-	{
-		let that: QuestionnaireController = this;
-
-		try
-		{
-			this.getQuestionsValidator.validate(request.data);
-			var data: IQuestionnaireGetQuestionsData = request.data as IQuestionnaireGetQuestionsData;
-		}
-		catch(error)
-		{
-			action.response(new Response(400, {error: error.message}));
-			return;
-		}
-
-		Questionnaire.findOne({userId: request.bridge.user._id, deleted: null, _id: data._id}, function(error: any, questionnaire: IQuestionnaireModel)
-		{
-			if(error)
-			{
-				action.response(new Response(500, {error: 'Internal Server Error'}));
-				that.emit('warn', {message: 'Error finding questionnaire', error});
-				return;
-			}
-
-			if(questionnaire === null)
-			{
-				action.response(new Response(404, {error: 'Questionnaire Not Found'}));
-				return;
-			}
-
-			Question.find({deleted: null, questionnaireId: data._id}, function(error: any, questions: Array<IQuestionModel>)
-			{
-				if(error)
-				{
-					action.response(new Response(500, {error: 'Internal Server Error'}));
-					that.emit('warn', {message: 'Error finding questionnaire questions', error});
-					return;
-				}
-
-				action.response(new Response(200, questions));
-			});
-		});
-	}
-
 	public createAction(request: IControllerRequest, action: IControllerAction): void
 	{
 		let that: QuestionnaireController = this;
@@ -149,10 +94,11 @@ export class QuestionnaireController extends Controller
 
 		let questionnaire: IQuestionnaireModel = new Questionnaire({
 				userId: request.bridge.user._id,
-				name: data.name, timer: data.timer,
+				name: data.name,
+				timer: data.timer,
 				autoplayTimeout: data.autoplayTimeout
 			});
-		questionnaire.save(function(error, questionnaire)
+		questionnaire.save(function(error, questionnaire: IQuestionnaireModel)
 		{
 			if(error)
 			{
@@ -190,7 +136,7 @@ export class QuestionnaireController extends Controller
 				timer: data.timer,
 				autoplayTimeout: data.autoplayTimeout,
 				updated: Date.now()
-			}, {new: true}, function(error, questionnaire)
+			}, {new: true}, function(error, questionnaire: IQuestionnaireModel)
 		{
 			if(error)
 			{
@@ -231,7 +177,7 @@ export class QuestionnaireController extends Controller
 				deleted: null
 			},{
 				deleted: Date.now()
-			}, {new: true}, function(error, questionnaire)
+			}, {new: true}, function(error, questionnaire: IQuestionnaireModel)
 		{
 			if(error)
 			{

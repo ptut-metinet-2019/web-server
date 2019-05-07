@@ -246,7 +246,7 @@ export class HttpManager extends EventEmitter
 			return;
 		}
 
-		if(!this.bridges.get(pending.user._id))
+		if(!this.bridges.has(pending.user._id))
 		{
 			this.bridges.set(pending.user._id, new DeviceBridge(pending.user));
 			this.emit('info', {message: 'Bridge created for User #' + pending.user._id});
