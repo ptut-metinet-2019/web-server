@@ -307,6 +307,8 @@ export class HttpManager extends EventEmitter
 			});
 		}
 
+		console.log(this.bridges);
+
 		this.bridges.get(pending.user._id).bindDevice(new Device(request, ws));
 	}
 
