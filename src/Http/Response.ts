@@ -1,9 +1,9 @@
 export class Response
 {
 	readonly status: number;
-	readonly data: object;
+	readonly data: any;
 
-	public constructor(status: number, data: object = null)
+	public constructor(status: number, data: any = null)
 	{
 		this.status = status;
 		this.data = data;
