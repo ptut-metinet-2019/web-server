@@ -48,7 +48,7 @@ export class HttpManager extends EventEmitter
 	private wss: WebSocket.Server = null;
 
 	private pending: Array<PendingDevice> = [];
-	private bridges: Map<string, DeviceBridge> = new Map();
+	private bridges: {[header: string]: DeviceBridge} = {};
 	private controllers: Map<string, Controller> = new Map();
 
 	public constructor()
@@ -93,7 +93,7 @@ export class HttpManager extends EventEmitter
 		this.wss.close(function()
 		{
 			that.wss = null;
-			that.bridges = new Map();
+			that.bridges = {};
 
 			that.server.close(function()
 			{
@@ -246,16 +246,16 @@ export class HttpManager extends EventEmitter
 			return;
 		}
 
-		if(!this.bridges.has(pending.user._id))
+		if(!this.bridges[pending.user._id])
 		{
-			this.bridges.set(pending.user._id, new DeviceBridge(pending.user));
+			this.bridges[pending.user._id] = new DeviceBridge(pending.user);
 			this.emit('info', {message: 'Bridge created for User #' + pending.user._id});
 
-			this.bridges.get(pending.user._id).on('info', (event: object) => that.emit('info', event));
-			this.bridges.get(pending.user._id).on('warn', (event: object) => that.emit('warn', event));
-			this.bridges.get(pending.user._id).on('error', (event: object) => that.emit('error', event));
+			this.bridges[pending.user._id].on('info', (event: object) => that.emit('info', event));
+			this.bridges[pending.user._id].on('warn', (event: object) => that.emit('warn', event));
+			this.bridges[pending.user._id].on('error', (event: object) => that.emit('error', event));
 
-			this.bridges.get(pending.user._id).on('request', function(event: {request: Request, device: Device, bridge: DeviceBridge})
+			this.bridges[pending.user._id].on('request', function(event: {request: Request, device: Device, bridge: DeviceBridge})
 			{
 				let controller: Controller = null;
 
@@ -299,17 +299,15 @@ export class HttpManager extends EventEmitter
 					});
 			});
 
-			this.bridges.get(pending.user._id).on('empty', function(event: {bridge: DeviceBridge})
+			this.bridges[pending.user._id].on('empty', function(event: {bridge: DeviceBridge})
 			{
-				that.bridges.delete(pending.user._id);
+				delete that.bridges[pending.user._id];
 
 				that.emit('info', {message: 'Bridge deleted for User #' + pending.user._id + ' (empty)'});
 			});
 		}
 
-		console.log(this.bridges);
-
-		this.bridges.get(pending.user._id).bindDevice(new Device(request, ws));
+		this.bridges[pending.user._id].bindDevice(new Device(request, ws));
 	}
 
 	private login(request: IncomingMessage, response: ServerResponse, body: {type: string, data: any}): void
