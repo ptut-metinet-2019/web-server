@@ -125,10 +125,14 @@ export class QuestionController extends Controller
 						return;
 					}
 
-					for(let question of questions)
-						(<any>question).choices = choices.filter((choice) => {return choice.questionId.toString() === question._id.toString()});
+					let questionsData = questions.map(function(question: IQuestionModel) {
+						let questionData = question.toJSON();
+						questionData.choices = choices.filter((choice) => {return choice.questionId.toString() === question._id.toString()});
 
-					action.response(new Response(200, {questions}));
+						return questionData;
+					});
+
+					action.response(new Response(200, {questions: questionsData}));
 				});
 			});
 		});
