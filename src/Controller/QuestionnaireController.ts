@@ -5,12 +5,7 @@ import {Questionnaire, IQuestionnaireModel} from '../Model/Questionnaire';
 import {Response} from '../Http/Response';
 import {Event} from '../Http/Event';
 
-import {Validator} from '../Validation/Validator';
-import {ValidationError} from '../Error/ValidationError';
-
-import {ObjectRule} from '../Validation/Rule/ObjectRule';
-import {StringRule} from '../Validation/Rule/StringRule';
-import {NumberRule} from '../Validation/Rule/NumberRule';
+import {Validator, ValidationError, ObjectRule, StringRule, NumberRule, BooleanRule} from '@aeres-games/validator';
 
 export interface IQuestionnaireCreateData
 {
@@ -46,18 +41,18 @@ export class QuestionnaireController extends Controller
 			name: new StringRule({minLength: 3, maxLength: 45}),
 			timer: new NumberRule({min: 0, max: 86400}),
 			autoplayTimeout: new NumberRule({min: 0, max: 86400})
-		}));
+		}), {throw: true});
 
 		this.updateValidator = new Validator(new ObjectRule({
 			_id: new StringRule({minLength: 1}),
 			name: new StringRule({minLength: 3, maxLength: 45}),
 			timer: new NumberRule({min: 0, max: 86400}),
 			autoplayTimeout: new NumberRule({min: 0, max: 86400})
-		}));
+		}), {throw: true});
 
 		this.deleteValidator = new Validator(new ObjectRule({
 			_id: new StringRule({minLength: 1})
-		}));
+		}), {throw: true});
 	}
 
 	public allAction(request: IControllerRequest, action: IControllerAction): void

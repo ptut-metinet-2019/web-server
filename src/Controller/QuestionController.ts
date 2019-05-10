@@ -7,13 +7,7 @@ import {Choice, IChoiceModel} from '../Model/Choice';
 import {Response} from '../Http/Response';
 import {Event} from '../Http/Event';
 
-import {Validator} from '../Validation/Validator';
-import {ValidationError} from '../Error/ValidationError';
-
-import {ObjectRule} from '../Validation/Rule/ObjectRule';
-import {StringRule} from '../Validation/Rule/StringRule';
-import {NumberRule} from '../Validation/Rule/NumberRule';
-import {BooleanRule} from '../Validation/Rule/BooleanRule';
+import {Validator, ValidationError, ObjectRule, StringRule, NumberRule, BooleanRule} from '@aeres-games/validator';
 
 export interface IQuestionGetData
 {
@@ -29,6 +23,15 @@ export interface IQuestionCreateData
 	anonymous		: boolean;
 }
 
+export interface IQuestionUpdateData
+{
+	_id				: string;
+	title			: string;
+	type			: string;
+	timer			: number;
+	anonymous		: boolean;
+}
+
 export interface IQuestionDeleteData
 {
 	_id				: string;
@@ -38,6 +41,7 @@ export class QuestionController extends Controller
 {
 	private getValidator	: Validator;
 	private createValidator	: Validator;
+	private updateValidator	: Validator;
 	private deleteValidator : Validator;
 
 	public constructor()
@@ -54,11 +58,19 @@ export class QuestionController extends Controller
 			type: new StringRule({regex: /^(free)|(choice)$/}),
 			timer: new NumberRule({min: 0, max: 86400, nullable: true}),
 			anonymous: new BooleanRule({})
-		}));
+		}), {throw: true});
+
+		this.updateValidator = new Validator(new ObjectRule({
+			_id: new StringRule({minLength: 1}),
+			title: new StringRule({minLength: 3, maxLength: 120}),
+			type: new StringRule({regex: /^(free)|(choice)$/}),
+			timer: new NumberRule({min: 0, max: 86400, nullable: true}),
+			anonymous: new BooleanRule({})
+		}), {throw: true});
 
 		this.deleteValidator = new Validator(new ObjectRule({
 			_id: new StringRule({minLength: 1})
-		}));
+		}), {throw: true});
 	}
 
 	public getAction(request: IControllerRequest, action: IControllerAction): void
@@ -176,6 +188,73 @@ export class QuestionController extends Controller
 		});
 	}
 
+	public updateAction(request: IControllerRequest, action: IControllerAction): void
+	{
+		let that: QuestionController = this;
+
+		try
+		{
+			this.updateValidator.validate(request.data);
+			var data: IQuestionUpdateData = request.data as IQuestionUpdateData;
+		}
+		catch(error)
+		{
+			action.response(new Response(400, {error: error.message}));
+			return;
+		}
+
+		Question.findOne({_id: data._id, deleted: null}, function(error, question: IQuestionModel)
+		{
+			if(error)
+			{
+				action.response(new Response(500, {error: 'Internal Server Error'}));
+				that.emit('warn', {message: 'Error finding and updating question', error});
+				return;
+			}
+
+			if(question === null)
+			{
+				action.response(new Response(404, {error: 'Question Not Found'}));
+				return;
+			}
+
+			Questionnaire.findOne({_id: question.questionnaireId, deleted: null, userId: request.bridge.user._id}, function(error, questionnaire: IQuestionnaireModel)
+			{
+				if(error)
+				{
+					action.response(new Response(500, {error: 'Internal Server Error'}));
+					that.emit('warn', {message: 'Error finding and updating question', error});
+					return;
+				}
+
+				if(questionnaire === null)
+				{
+					action.response(new Response(404, {error: 'Questionnaire Not Found'}));
+					return;
+				}
+
+				question.title = data.title;
+				question.type = data.type;
+				question.timer = data.timer;
+				question.anonymous = data.anonymous;
+				question.updated = new Date();
+
+				question.save(function(error, question: IQuestionModel)
+				{
+					if(error)
+					{
+						action.response(new Response(500, {error: 'Internal Server Error'}));
+						that.emit('warn', {message: 'Error updating question', error});
+						return;
+					}
+
+					action.broadcast(new Event('question', 'update', question));
+					action.response(new Response(200, question));
+				});
+			});
+		});
+	}
+
 	public deleteAction(request: IControllerRequest, action: IControllerAction): void
 	{
 		let that: QuestionController = this;
@@ -215,7 +294,7 @@ export class QuestionController extends Controller
 					return;
 				}
 
-				if(question === null)
+				if(questionnaire === null)
 				{
 					action.response(new Response(404, {error: 'Questionnaire Not Found'}));
 					return;

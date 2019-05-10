@@ -20,6 +20,7 @@
   "homepage": "https://github.com/ptut-metinet-2019/web-server#readme",
   "dependencies": {
     "@aeres-games/event-emitter": "^1.1.0",
+    "@aeres-games/validator": "^1.1.0",
     "bcrypt": "^3.0.5",
     "dotenv": "^7.0.0",
     "js-sha512": "^0.8.0",
