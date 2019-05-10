@@ -17,6 +17,7 @@ import {isValidEmail} from '../Helper/StringHelper';
 
 import {Controller, IControllerAction, IControllerRequest} from '../Controller/Controller';
 import {QuestionnaireController} from '../Controller/QuestionnaireController';
+import {QuestionController} from '../Controller/QuestionController';
 
 const KEY = readFileSync('storage/cert/server.key');
 const CERT = readFileSync('storage/cert/server.cert');
@@ -56,6 +57,7 @@ export class HttpManager extends EventEmitter
 		super();
 
 		this.controllers.set('questionnaire', new QuestionnaireController());
+		this.controllers.set('question', new QuestionController());
 	}
 
 	public start(): void
