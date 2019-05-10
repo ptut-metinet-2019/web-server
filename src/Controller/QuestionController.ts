@@ -128,7 +128,7 @@ export class QuestionController extends Controller
 					for(let question of questions)
 						(<any>question).choices = choices.filter((choice) => {return choice.questionId.toString() === question._id.toString()});
 
-					action.response(new Response(200, questions));
+					action.response(new Response(200, {questions}));
 				});
 			});
 		});
