@@ -18,6 +18,8 @@ import {isValidEmail} from '../Helper/StringHelper';
 import {Controller, IControllerAction, IControllerRequest} from '../Controller/Controller';
 import {QuestionnaireController} from '../Controller/QuestionnaireController';
 import {QuestionController} from '../Controller/QuestionController';
+import {ChoiceController} from '../Controller/ChoiceController';
+import {SessionController} from '../Controller/SessionController';
 
 const KEY = readFileSync('storage/cert/server.key');
 const CERT = readFileSync('storage/cert/server.cert');
@@ -39,6 +41,7 @@ export interface PendingDevice
 {
 	token: string;
 	socket: Socket;
+	phoneNumber?: string;
 	user: IUserModel;
 	time: Date;
 }
@@ -58,6 +61,8 @@ export class HttpManager extends EventEmitter
 
 		this.controllers.set('questionnaire', new QuestionnaireController());
 		this.controllers.set('question', new QuestionController());
+		this.controllers.set('choice', new ChoiceController());
+		this.controllers.set('session', new SessionController());
 	}
 
 	public start(): void
@@ -210,6 +215,9 @@ export class HttpManager extends EventEmitter
 		{
 			if(pending.token === queryParameters.token)
 			{
+				if(typeof queryParameters.phone === 'string')
+					pending.phoneNumber = queryParameters.phone;
+
 				pending.socket = socket;
 				user = pending.user;
 				break;
@@ -309,7 +317,7 @@ export class HttpManager extends EventEmitter
 			});
 		}
 
-		this.bridges[pending.user._id].bindDevice(new Device(request, ws));
+		this.bridges[pending.user._id].bindDevice(new Device(request, ws, pending.phoneNumber));
 	}
 
 	private login(request: IncomingMessage, response: ServerResponse, body: {type: string, data: any}): void

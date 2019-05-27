@@ -8,16 +8,19 @@ import {Event} from './Event';
 
 export class Device extends EventEmitter
 {
-	private request: IncomingMessage;
-	private ws: Websocket;
+	private readonly request: IncomingMessage;
+	private readonly ws: Websocket;
 
-	public constructor(request: IncomingMessage, ws: Websocket)
+	public readonly phoneNumber?: string;
+
+	public constructor(request: IncomingMessage, ws: Websocket, phoneNumber?: string)
 	{
 		super();
 		let that: EventEmitter = this;
 
 		this.request = request;
 		this.ws = ws;
+		this.phoneNumber = phoneNumber;
 
 		this.ws.on('error', (error: Error) => that.emit('warn', {message: 'A Websocket error occured', error}));
 

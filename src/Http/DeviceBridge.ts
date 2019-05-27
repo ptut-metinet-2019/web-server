@@ -3,11 +3,14 @@ import {IUserModel} from '../Model/User';
 import {Device} from './Device';
 import {Event} from './Event';
 import {Request} from './Request';
+import {SessionHandler} from '../Session/SessionHandler';
 
 export class DeviceBridge extends EventEmitter
 {
-	readonly user: IUserModel;
-	readonly devices: Array<Device> = [];
+	public readonly user: IUserModel;
+	public readonly devices: Array<Device> = [];
+
+	public sessionHandler: SessionHandler = null;
 
 	public constructor(user: IUserModel)
 	{

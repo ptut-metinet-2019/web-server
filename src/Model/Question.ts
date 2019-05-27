@@ -1,4 +1,5 @@
 import * as Mongoose from 'mongoose';
+import {IChoiceModel} from './Choice';
 
 export interface IQuestionModel extends Mongoose.Document
 {
@@ -12,6 +13,8 @@ export interface IQuestionModel extends Mongoose.Document
 	created			: Date;
 	updated			: Date;
 	deleted			: Date;
+
+	choices			?: Array<IChoiceModel>;
 }
 
 export const QuestionSchema: Mongoose.Schema = new Mongoose.Schema(

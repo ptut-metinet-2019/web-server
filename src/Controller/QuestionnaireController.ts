@@ -122,6 +122,12 @@ export class QuestionnaireController extends Controller
 			return;
 		}
 
+		if(request.bridge.sessionHandler && request.bridge.sessionHandler.questionnaire.id === data._id)
+		{
+			action.response(new Response(403, {error: 'Questionnaire is currently running'}));
+			return;
+		}
+
 		Questionnaire.findOneAndUpdate({
 				_id: data._id, 
 				userId: request.bridge.user._id,
@@ -163,6 +169,12 @@ export class QuestionnaireController extends Controller
 		catch(error)
 		{
 			action.response(new Response(400, {error: error.message}));
+			return;
+		}
+
+		if(request.bridge.sessionHandler && request.bridge.sessionHandler.questionnaire.id === data._id)
+		{
+			action.response(new Response(403, {error: 'Questionnaire is currently running'}));
 			return;
 		}
 

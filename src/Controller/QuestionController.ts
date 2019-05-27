@@ -168,6 +168,12 @@ export class QuestionController extends Controller
 				return;
 			}
 
+			if(request.bridge.sessionHandler && request.bridge.sessionHandler.questionnaire.id === questionnaire.id)
+			{
+				action.response(new Response(403, {error: 'Questionnaire is currently running'}));
+				return;
+			}
+
 			let question: IQuestionModel = new Question({
 				questionnaireId: data.questionnaireId,
 				title: data.title,
@@ -237,6 +243,12 @@ export class QuestionController extends Controller
 					return;
 				}
 
+				if(request.bridge.sessionHandler && request.bridge.sessionHandler.questionnaire.id === questionnaire.id)
+				{
+					action.response(new Response(403, {error: 'Questionnaire is currently running'}));
+					return;
+				}
+
 				question.title = data.title;
 				question.type = data.type;
 				question.timer = data.timer;
@@ -301,6 +313,12 @@ export class QuestionController extends Controller
 				if(questionnaire === null)
 				{
 					action.response(new Response(404, {error: 'Questionnaire Not Found'}));
+					return;
+				}
+
+				if(request.bridge.sessionHandler && request.bridge.sessionHandler.questionnaire.id === questionnaire.id)
+				{
+					action.response(new Response(403, {error: 'Questionnaire is currently running'}));
 					return;
 				}
 

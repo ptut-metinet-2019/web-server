@@ -1,4 +1,5 @@
 import * as Mongoose from 'mongoose';
+import {IQuestionModel} from './Question';
 
 export interface IQuestionnaireModel extends Mongoose.Document
 {
@@ -10,6 +11,8 @@ export interface IQuestionnaireModel extends Mongoose.Document
 	created			: Date;
 	updated			: Date;
 	deleted			: Date;
+
+	questions		?: Array<IQuestionModel>;
 }
 
 export const QuestionnaireSchema: Mongoose.Schema = new Mongoose.Schema(
