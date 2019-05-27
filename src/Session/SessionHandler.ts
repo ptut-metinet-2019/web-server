@@ -1,8 +1,12 @@
 import {DeviceBridge} from '../Http/DeviceBridge';
 import {Device} from '../Http/Device';
 import {Event} from '../Http/Event';
+import {SessionQuestionHandler} from './SessionQuestionHandler';
 
+import {Session, ISessionModel} from '../Model/Session';
+import {ISessionAnswerModel} from '../Model/SessionAnswer';
 import {IQuestionnaireModel} from '../Model/Questionnaire';
+import {IQuestionModel} from '../Model/Question';
 
 export class SessionHandler
 {
@@ -11,6 +15,8 @@ export class SessionHandler
 	public readonly questionnaire: IQuestionnaireModel;
 
 	public running: boolean = false;
+	private questionHandler: SessionQuestionHandler = null;
+	private answers: Array<ISessionAnswerModel> = [];
 
 	public constructor(bridge: DeviceBridge, fetcher: Device, questionnaire: IQuestionnaireModel)
 	{
@@ -24,14 +30,38 @@ export class SessionHandler
 		if(this.running)
 			return;
 
-		this.bridge.broadcast(new Event('session', 'start', {time: new Date()}));
+		this.next();
+		this.running = true;
 	}
 
-	public stop(): void
+	public stop(save: boolean = false): void
 	{
+		let that = this;
+
 		if(this.running)
 		{
+			if(this.questionHandler)
+			{
+				this.questionHandler.removeAllListeners();
+				this.questionHandler.end();
+				this.questionHandler.terminate();
+				this.questionHandler = null;
+			}
+			else if(save)
+			{
+				let session = new Session({questionnaireId: this.questionnaire.id, phone: this.fetcher.phoneNumber});
+				session.save(function(error, session: ISessionModel)
+				{
+					if(error) return;
 
+					for(let answer of that.answers)
+						answer.sessionId = session.id;
+
+					Session.insertMany(that.answers);
+				});
+			}
+
+			this.answers = [];
 			this.running = false;
 		}
 
@@ -39,5 +69,38 @@ export class SessionHandler
 		this.bridge.sessionHandler = null;
 	}
 
-	private
+	public skip(): void
+	{
+		if(!this.questionHandler)
+			return;
+
+		this.questionHandler.end();
+	}
+
+	public next(): void
+	{
+		if(!this.questionHandler)
+			return;
+
+		this.questionHandler.terminate();
+	}
+
+	private startQuestion(number: number)
+	{
+		let that = this;
+
+		if(this.questionnaire.questions.length <= number)
+		{
+			this.questionHandler = null;
+			return this.stop(true);
+		}
+
+		this.questionHandler = new SessionQuestionHandler(this, this.questionnaire.questions[number], number);
+		this.questionHandler.on('terminated', function()
+		{
+			that.answers = that.answers.concat(that.questionHandler.answers);
+			that.questionHandler.removeAllListeners();
+			that.startQuestion(that.questionHandler.number + 1);
+		});
+	}
 }

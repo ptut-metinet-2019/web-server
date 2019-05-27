@@ -29,7 +29,7 @@ export interface ISessionGetData
 
 export class SessionController extends Controller
 {
-	private startValidator: Validator;
+	private initValidator: Validator;
 	private allValidator: Validator;
 	private getValidator: Validator;
 
@@ -37,7 +37,7 @@ export class SessionController extends Controller
 	{
 		super();
 
-		this.startValidator = new Validator(new ObjectRule({
+		this.initValidator = new Validator(new ObjectRule({
 			questionnaireId: new StringRule({minLength: 1})
 		}));
 
@@ -50,13 +50,13 @@ export class SessionController extends Controller
 		}));
 	}
 
-	public createAction(request: IControllerRequest, action: IControllerAction): void
+	public initAction(request: IControllerRequest, action: IControllerAction): void
 	{
 		let that: SessionController = this;
 
 		try
 		{
-			this.startValidator.validate(request.data);
+			this.initValidator.validate(request.data);
 			var data: ISessionStartData = request.data as ISessionStartData;
 		}
 		catch(error)
@@ -145,7 +145,7 @@ export class SessionController extends Controller
 
 					request.bridge.sessionHandler = new SessionHandler(request.bridge, fetcher, questionnaire);
 
-					action.broadcast(new Event('session', 'create', {questionnaireId: questionnaire.id, phoneNumber: fetcher.phoneNumber}));
+					action.broadcast(new Event('session', 'init', {questionnaireId: questionnaire.id, phoneNumber: fetcher.phoneNumber}));
 					action.response(new Response(204));
 				});
 			});
@@ -170,14 +170,39 @@ export class SessionController extends Controller
 		action.response(new Response(204));
 	}
 
-	public stopAction(request: IControllerRequest, action: IControllerAction): void
+	public skipAction(request: IControllerRequest, action: IControllerAction): void
 	{
-		if(!request.bridge.sessionHandler)
+		if(!request.bridge.sessionHandler || !request.bridge.sessionHandler.running)
 		{
 			action.response(new Response(403, {error: 'No session is currently running'}));
 			return;
 		}
 
+		request.bridge.sessionHandler.skip();
+		action.response(new Response(204));
+	}
+
+	public nextAction(request: IControllerRequest, action: IControllerAction): void
+	{
+		if(!request.bridge.sessionHandler || !request.bridge.sessionHandler.running)
+		{
+			action.response(new Response(403, {error: 'No session is currently running'}));
+			return;
+		}
+
+		request.bridge.sessionHandler.next();
+		action.response(new Response(204));
+	}
+
+	public stopAction(request: IControllerRequest, action: IControllerAction): void
+	{
+		if(!request.bridge.sessionHandler)
+		{
+			action.response(new Response(403, {error: 'No session has been created'}));
+			return;
+		}
+
+		request.bridge.sessionHandler.stop();
 		action.response(new Response(204));
 	}
 

@@ -4,7 +4,7 @@ import {Server, createServer} from 'https';
 import {Socket} from 'net';
 import * as WebSocket from 'ws';
 import {DeviceBridge} from './DeviceBridge';
-import {EventEmitter} from '@aeres-games/event-emitter';
+import {EventEmitter} from 'events';
 import * as Url from 'url';
 import {IUserModel, User} from '../Model/User';
 import {Device} from './Device';

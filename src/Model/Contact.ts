@@ -27,3 +27,27 @@ export const ContactSchema: Mongoose.Schema = new Mongoose.Schema(
 });
 
 export const Contact: Mongoose.Model<IContactModel> = Mongoose.model<IContactModel>('Contact', ContactSchema);
+
+export function getContact(phone: string): Promise<IContactModel>
+{
+	return new Promise(function(resolve, reject)
+	{
+		Contact.findOne({phone, deleted: null}, function(error, contact: IContactModel)
+		{
+			if(error)
+				return reject(error);
+
+			if(contact)
+				return resolve(contact);
+
+			contact = new Contact({phone});
+			contact.save(function(error, contact: IContactModel)
+			{
+				if(error)
+					return reject(error);
+
+				return resolve(contact);
+			});
+		});
+	});
+}

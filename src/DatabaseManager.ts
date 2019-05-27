@@ -1,5 +1,5 @@
 import * as Mongoose from 'mongoose';
-import {EventEmitter} from '@aeres-games/event-emitter';
+import {EventEmitter} from 'events';
 
 // We load all model classes so that they are registered correctly and in the right order
 import {User} 			from './Model/User';

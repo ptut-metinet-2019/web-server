@@ -1,4 +1,4 @@
-import {EventEmitter} from '@aeres-games/event-emitter';
+import {EventEmitter} from 'events';
 import {IncomingMessage} from 'http';
 import * as Websocket from 'ws';
 
@@ -76,6 +76,10 @@ export class Device extends EventEmitter
 				}
 
 				that.emit('request', {request: new Request(message.id, message.target, message.action, message.data), device: that});
+			}
+			else if(message.type === 'answer')
+			{
+				that.emit('answer', message.data);
 			}
 			else
 			{

@@ -5,7 +5,7 @@ export interface IQuestionnaireModel extends Mongoose.Document
 {
 	userId			: string;
 	name			: string;
-	timer			: string;
+	timer			: number;
 	autoplayTimeout	: number;
 
 	created			: Date;

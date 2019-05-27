@@ -1,4 +1,4 @@
-import {EventEmitter} from '@aeres-games/event-emitter';
+import {EventEmitter} from 'events';
 import {IUserModel} from '../Model/User';
 import {Device} from './Device';
 import {Event} from './Event';

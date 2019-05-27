@@ -1,4 +1,4 @@
-import {EventEmitter} from '@aeres-games/event-emitter';
+import {EventEmitter} from 'events';
 import {DatabaseManager} from './DatabaseManager';
 import {HttpManager} from './Http/HttpManager';
 

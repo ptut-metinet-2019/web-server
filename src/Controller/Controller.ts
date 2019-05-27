@@ -1,4 +1,4 @@
-import {EventEmitter} from '@aeres-games/event-emitter';
+import {EventEmitter} from 'events';
 import {DeviceBridge} from '../Http/DeviceBridge';
 import {Device} from '../Http/Device';
 import {Response} from '../Http/Response';
