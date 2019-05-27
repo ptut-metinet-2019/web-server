@@ -221,7 +221,7 @@ export class ChoiceController extends Controller
 
 		try
 		{
-			this.updateValidator.validate(request.data);
+			this.deleteValidator.validate(request.data);
 			var data: IChoiceDeleteData = request.data as IChoiceDeleteData;
 		}
 		catch(error)
