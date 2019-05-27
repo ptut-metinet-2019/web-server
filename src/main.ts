@@ -12,7 +12,7 @@ server.on('info', function(event: {message: string, error?: any}): void
 
 	if(process.env.SERVER_DEBUG === 'true')
 	{
-		console.log('[' + time.toISOString().substr(11, 8) + '] ' + event.message);
+		console.log('[' + time.toISOString().substr(0, 19).replace('T', ' ') + '] ' + event.message);
 
 		if(event.error)
 			console.log(event.error);
@@ -23,7 +23,7 @@ server.on('warn', function(event: {message: string, error?: any}): void
 {
 	let time = new Date();
 
-	console.warn('[' + time.toISOString().substr(11, 8) + '] ' + event.message);
+	console.warn('[' + time.toISOString().substr(0, 19).replace('T', ' ') + '] ' + event.message);
 
 	if(event.error)
 		console.warn(event.error);
@@ -33,7 +33,7 @@ server.on('error', function(event: {message: string, error: any}): void
 {
 	let time = new Date();
 
-	console.error('[' + time.toISOString().substr(11, 8) + '] ' + (event.error instanceof Error ? event.error.name + ": " : '') + event.message);
+	console.error('[' + time.toISOString().substr(0, 19).replace('T', ' ') + '] ' + (event.error instanceof Error ? event.error.name + ": " : '') + event.message);
 	console.error(event.error);
 });
 
