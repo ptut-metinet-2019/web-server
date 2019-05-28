@@ -30,7 +30,7 @@ export class SessionHandler
 		if(this.running)
 			return;
 
-		this.next();
+		this.startQuestion(0);
 		this.running = true;
 	}
 
