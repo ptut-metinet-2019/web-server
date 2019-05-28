@@ -72,11 +72,12 @@ export class SessionHandler extends EventEmitter
 							that.emit('warn', {message: 'Couldn\'t save Session Answers', error});
 							return;
 						}
+
+						that.answers = [];
 					});
 				});
 			}
 
-			this.answers = [];
 			this.running = false;
 		}
 
