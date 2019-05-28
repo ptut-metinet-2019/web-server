@@ -378,9 +378,9 @@ export class SessionController extends Controller
 
 								for(let question of questions)
 								{
+									console.log(answer.questionId + ' - ' + question.id);
 									if(answer.questionId === question.id)
 									{
-										console.log('ok');
 										if(!question.answers)
 											question.answers = [];
 
