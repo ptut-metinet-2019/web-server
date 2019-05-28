@@ -79,6 +79,7 @@ export class SessionQuestionHandler extends EventEmitter
 			});
 		});
 
+		this.emit('info', {message: 'Question #' + number + ' started on Session for Questionnaire titled "' + this.handler.questionnaire.name + '"'});
 		this.handler.bridge.broadcast(new Event('session', 'question-start', {questionId: this.question.id}));
 
 		let timer = this.question.timer === null ? this.handler.questionnaire.timer : this.question.timer;
@@ -98,9 +99,11 @@ export class SessionQuestionHandler extends EventEmitter
 		if(this.state !== SessionQuestionState.Listening)
 			return;
 
+		this.emit('info', {message: 'Question #' + this.number + ' ended on Session for Questionnaire titled "' + this.handler.questionnaire.name + '"'});
 		this._state = SessionQuestionState.Ended;
 		this.handler.fetcher.removeAllListeners('answer');
 		this.handler.bridge.broadcast(new Event('session', 'question-end', {}));
+		
 
 		if(this.handler.questionnaire.autoplayTimeout > 0)
 		{
@@ -116,6 +119,7 @@ export class SessionQuestionHandler extends EventEmitter
 		if(this.state !== SessionQuestionState.Ended)
 			return;
 
+		this.emit('info', {message: 'Question #' + this.number + ' terminated on Session for Questionnaire titled "' + this.handler.questionnaire.name + '"'});
 		this._state = SessionQuestionState.Terminated;
 		this.emit('terminated');
 	}

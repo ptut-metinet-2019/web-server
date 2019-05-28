@@ -66,10 +66,21 @@ export class HttpManager extends EventEmitter
 	{
 		super();
 
-		this.controllers.set('questionnaire', new QuestionnaireController());
-		this.controllers.set('question', new QuestionController());
-		this.controllers.set('choice', new ChoiceController());
-		this.controllers.set('session', new SessionController());
+		this.bindController('questionnaire', new QuestionnaireController());
+		this.bindController('question', new QuestionController());
+		this.bindController('choice', new ChoiceController());
+		this.bindController('session', new SessionController());
+	}
+
+	private bindController(name: string, controller: Controller): void
+	{
+		let that = this;
+
+		this.controllers.set(name, controller);
+
+		controller.on('info', (event: object) => that.emit('info', event));
+		controller.on('warn', (event: object) => that.emit('warn', event));
+		controller.on('error', (event: object) => that.emit('error', event));
 	}
 
 	public start(): void

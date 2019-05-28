@@ -8,7 +8,9 @@ import {ISessionAnswerModel} from '../Model/SessionAnswer';
 import {IQuestionnaireModel} from '../Model/Questionnaire';
 import {IQuestionModel} from '../Model/Question';
 
-export class SessionHandler
+import {EventEmitter} from 'events';
+
+export class SessionHandler extends EventEmitter
 {
 	public readonly bridge: DeviceBridge;
 	public readonly fetcher: Device;
@@ -20,9 +22,13 @@ export class SessionHandler
 
 	public constructor(bridge: DeviceBridge, fetcher: Device, questionnaire: IQuestionnaireModel)
 	{
+		super();
+
 		this.bridge = bridge;
 		this.fetcher = fetcher;
 		this.questionnaire = questionnaire;
+
+		this.emit('info', {message: 'Session initialized for Questionnaire titled "' + questionnaire.name + '" (User #' + questionnaire.userId + ')'});
 	}
 
 	public start(): void
@@ -65,6 +71,7 @@ export class SessionHandler
 			this.running = false;
 		}
 
+		this.emit('info', {message: 'Session stopped for Questionnaire titled "' + this.questionnaire.name + '" (Saved : ' + (save ? 'true' : 'false') + ')'});
 		this.bridge.broadcast(new Event('session', 'stop', {}));
 		this.bridge.sessionHandler = null;
 	}
@@ -102,5 +109,9 @@ export class SessionHandler
 			that.questionHandler.removeAllListeners();
 			that.startQuestion(that.questionHandler.number + 1);
 		});
+
+		this.questionHandler.on('info', (event: object) => that.emit('info', event));
+		this.questionHandler.on('warn', (event: object) => that.emit('warn', event));
+		this.questionHandler.on('error', (event: object) => that.emit('error', event));
 	}
 }

@@ -172,6 +172,9 @@ export class SessionController extends Controller
 					}
 
 					request.bridge.sessionHandler = new SessionHandler(request.bridge, fetcher, questionnaire);
+					request.bridge.sessionHandler.on('info', (event: object) => that.emit('info', event));
+					request.bridge.sessionHandler.on('warn', (event: object) => that.emit('warn', event));
+					request.bridge.sessionHandler.on('error', (event: object) => that.emit('error', event));
 
 					action.broadcast(new Event('session', 'init', {questionnaire: questionnaireData, phoneNumber: fetcher.phoneNumber}));
 					action.response(new Response(204));
