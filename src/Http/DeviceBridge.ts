@@ -30,6 +30,7 @@ export class DeviceBridge extends EventEmitter
 		device.on('close', function(event: {code: number, reason: string, device: Device})
 		{
 			that.emit('info', {message: 'User #' + that.user._id + ' device connection closed'});
+			event.device.destroy();
 
 			for(let i = 0; i < that.devices.length; ++i)
 			{

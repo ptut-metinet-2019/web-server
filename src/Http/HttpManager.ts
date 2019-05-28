@@ -46,13 +46,20 @@ export interface PendingDevice
 	time: Date;
 }
 
+export interface ReconnectingDevice
+{
+	socket: Socket;
+	device: Device;
+}
+
 export class HttpManager extends EventEmitter
 {
 	private server: Server = null;
 	private wss: WebSocket.Server = null;
 
 	private pending: Array<PendingDevice> = [];
-	private bridges: {[header: string]: DeviceBridge} = {};
+	private reconnecting: Array<ReconnectingDevice> = [];
+	private bridges: {[userId: string]: DeviceBridge} = {};
 	private controllers: Map<string, Controller> = new Map();
 
 	public constructor()
@@ -226,6 +233,21 @@ export class HttpManager extends EventEmitter
 
 		if(!user)
 		{
+			for(let bridge of Object.values(this.bridges))
+			{
+				for(let device of bridge.devices)
+				{
+					if(device.token === queryParameters.token)
+					{
+						user = bridge.user;
+						this.reconnecting.push({socket, device});
+					}
+				}
+			}
+		}
+
+		if(!user)
+		{
 			socket.destroy();
 			return;
 		}
@@ -235,6 +257,15 @@ export class HttpManager extends EventEmitter
 
 	private handleConnection(ws: WebSocket, request: IncomingMessage): void
 	{
+		for(let reconnecting of this.reconnecting)
+		{
+			if(reconnecting.socket === request.socket)
+			{
+				reconnecting.device.setWebsocket(ws);
+				return;
+			}
+		}
+
 		let pending: PendingDevice = null;
 		let that: HttpManager = this;
 
@@ -317,7 +348,7 @@ export class HttpManager extends EventEmitter
 			});
 		}
 
-		this.bridges[pending.user._id].bindDevice(new Device(request, ws, pending.phoneNumber));
+		this.bridges[pending.user._id].bindDevice(new Device(ws, pending.token, pending.phoneNumber));
 	}
 
 	private login(request: IncomingMessage, response: ServerResponse, body: {type: string, data: any}): void

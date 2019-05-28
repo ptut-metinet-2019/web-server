@@ -8,25 +8,47 @@ import {Event} from './Event';
 
 export class Device extends EventEmitter
 {
-	private readonly request: IncomingMessage;
-	private readonly ws: Websocket;
+	private ws: Websocket;
+	private closeTimeout: NodeJS.Timeout = null;
+	private open = false;
 
+	public readonly token: string;
 	public readonly phoneNumber?: string;
 
-	public constructor(request: IncomingMessage, ws: Websocket, phoneNumber?: string)
+	public constructor(ws: Websocket, token: string, phoneNumber?: string)
 	{
 		super();
-		let that: EventEmitter = this;
 
-		this.request = request;
-		this.ws = ws;
+		this.token = token;
 		this.phoneNumber = phoneNumber;
+
+		this.setWebsocket(ws);
+	}
+
+	public setWebsocket(ws: Websocket): void
+	{
+		if(this.ws)
+			this.ws.close();
+
+		if(this.closeTimeout)
+		{
+			clearTimeout(this.closeTimeout);
+			this.closeTimeout = null;
+		}
+
+		let that = this;
+		this.ws = ws;
 
 		this.ws.on('error', (error: Error) => that.emit('warn', {message: 'A Websocket error occured', error}));
 
 		this.ws.on('close', function(code: number, reason: string)
 		{
-			that.emit('close', {code, reason, device: that});
+			that.open = false;
+
+			that.closeTimeout = setTimeout(function()
+			{
+				that.emit('close', {code, reason, device: that});
+			}, 10000);
 		});
 
 		this.ws.on('message', function(messageString: string)
@@ -86,15 +108,33 @@ export class Device extends EventEmitter
 				that.emit('warn', {message: 'Unknown message type ' + message.type});
 			}
 		});
+
+		this.open = true;
+	}
+
+	public destroy()
+	{
+		this.open = false;
+
+		if(this.closeTimeout)
+		{
+			clearTimeout(this.closeTimeout);
+			this.closeTimeout = null;
+		}
+
+		if(this.ws)
+			this.ws.close();
 	}
 
 	public sendResponse(request: Request, response: Response): void
 	{
-		this.ws.send(JSON.stringify({type: 'response', request: request.id, status: response.status, data: response.data}));
+		if(this.open)
+			this.ws.send(JSON.stringify({type: 'response', request: request.id, status: response.status, data: response.data}));
 	}
 
 	public sendMessage(message: string): void
 	{
-		this.ws.send(message);
+		if(this.open)
+			this.ws.send(message);
 	}
 }
