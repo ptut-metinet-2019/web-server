@@ -145,7 +145,7 @@ export class SessionController extends Controller
 
 					request.bridge.sessionHandler = new SessionHandler(request.bridge, fetcher, questionnaire);
 
-					action.broadcast(new Event('session', 'init', {questionnaireId: questionnaire.id, phoneNumber: fetcher.phoneNumber}));
+					action.broadcast(new Event('session', 'init', {questionnaire, phoneNumber: fetcher.phoneNumber}));
 					action.response(new Response(204));
 				});
 			});
