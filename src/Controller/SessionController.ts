@@ -363,6 +363,9 @@ export class SessionController extends Controller
 
 						SessionAnswer.find({sessionId: session.id}, function(error, answers: Array<ISessionAnswerModel>)
 						{
+							console.log(questions);
+							console.log(answers);
+
 							if(error)
 							{
 								action.response(new Response(500, {error: 'Internal Server Error'}));
@@ -415,7 +418,6 @@ export class SessionController extends Controller
 
 								for(let question of questionnaire.questions)
 								{
-									console.log(question.answers);
 									if(!question.answers)
 										continue;
 
