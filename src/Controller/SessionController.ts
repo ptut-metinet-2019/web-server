@@ -415,6 +415,7 @@ export class SessionController extends Controller
 
 								for(let question of questionnaire.questions)
 								{
+									console.log(question.answers);
 									if(!question.answers)
 										continue;
 
@@ -440,7 +441,6 @@ export class SessionController extends Controller
 									questionnaireData.questions.push(questionData);
 								}
 
-								console.log(questionnaire);
 								action.response(new Response(200, {questionnaire: questionnaireData}));
 							});
 						});
