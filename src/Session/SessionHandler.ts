@@ -18,7 +18,7 @@ export class SessionHandler extends EventEmitter
 
 	public running: boolean = false;
 	private questionHandler: SessionQuestionHandler = null;
-	private answers: Array<ISessionAnswerModel> = [];
+	private answers: Array<any> = [];
 
 	public constructor(bridge: DeviceBridge, fetcher: Device, questionnaire: IQuestionnaireModel)
 	{
@@ -65,9 +65,7 @@ export class SessionHandler extends EventEmitter
 					for(let answer of that.answers)
 						answer.sessionId = session.id;
 
-					console.log(that.answers);
-
-					SessionAnswer.insertMany(that.answers, {}, function(error, answers: Array<ISessionAnswerModel>)
+					SessionAnswer.insertMany(that.answers, function(error, answers: Array<ISessionAnswerModel>)
 					{
 						if(error)
 						{
