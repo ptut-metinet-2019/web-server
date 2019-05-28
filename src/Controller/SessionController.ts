@@ -378,8 +378,7 @@ export class SessionController extends Controller
 
 								for(let question of questions)
 								{
-									console.log(answer.questionId + ' - ' + question.id);
-									if(answer.questionId === question.id)
+									if(answer.questionId.toString() === question.id)
 									{
 										if(!question.answers)
 											question.answers = [];
@@ -403,7 +402,7 @@ export class SessionController extends Controller
 								{
 									for(let contact of contacts)
 									{
-										if(contact.id === answer.contactId)
+										if(contact.id === answer.contactId.toString())
 										{
 											answer.contact = contact;
 											break;
