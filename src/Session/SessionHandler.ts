@@ -4,7 +4,7 @@ import {Event} from '../Http/Event';
 import {SessionQuestionHandler} from './SessionQuestionHandler';
 
 import {Session, ISessionModel} from '../Model/Session';
-import {ISessionAnswerModel} from '../Model/SessionAnswer';
+import {SessionAnswer, ISessionAnswerModel} from '../Model/SessionAnswer';
 import {IQuestionnaireModel} from '../Model/Questionnaire';
 import {IQuestionModel} from '../Model/Question';
 
@@ -65,7 +65,14 @@ export class SessionHandler extends EventEmitter
 					for(let answer of that.answers)
 						answer.sessionId = session.id;
 
-					Session.insertMany(that.answers);
+					SessionAnswer.insertMany(that.answers, {}, function(error, answers: Array<ISessionAnswerModel>)
+					{
+						if(error)
+						{
+							that.emit('warn', {message: 'Couldn\'t save Session Answers', error});
+							return;
+						}
+					});
 				});
 			}
 
