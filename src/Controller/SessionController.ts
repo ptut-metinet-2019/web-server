@@ -143,9 +143,28 @@ export class SessionController extends Controller
 						return;
 					}
 
+					let questionnaireData = questionnaire.toJSON();
+					questionnaireData.questions = [];
+
+					for(let question of questionnaire.questions)
+					{
+						let questionData = question.toJSON();
+
+						if(question.type === 'choice')
+						{
+							let choicesData: Array<any> = [];
+							for(let choice of question.choices)
+								choicesData.push(choice.toJSON());
+
+							questionData.choices = choicesData;
+						}
+
+						questionnaireData.questions.push(questionData);
+					}
+
 					request.bridge.sessionHandler = new SessionHandler(request.bridge, fetcher, questionnaire);
 
-					action.broadcast(new Event('session', 'init', {questionnaire, phoneNumber: fetcher.phoneNumber}));
+					action.broadcast(new Event('session', 'init', {questionnaire: questionnaireData, phoneNumber: fetcher.phoneNumber}));
 					action.response(new Response(204));
 				});
 			});
