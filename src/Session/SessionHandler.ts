@@ -58,7 +58,7 @@ export class SessionHandler extends EventEmitter
 				{
 					if(error)
 					{
-						that.emit('error', {message: 'Couldn\'t save Session', error});
+						that.emit('warn', {message: 'Couldn\'t save Session', error});
 						return;
 					}
 

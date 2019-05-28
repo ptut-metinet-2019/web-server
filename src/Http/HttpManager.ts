@@ -239,7 +239,7 @@ export class HttpManager extends EventEmitter
 		{
 			if(pending.token === queryParameters.token)
 			{
-				if(typeof queryParameters.phone === 'string')
+				if(typeof queryParameters.phone === 'string' && queryParameters.phone.length > 0)
 					pending.phoneNumber = queryParameters.phone;
 
 				pending.socket = socket;
