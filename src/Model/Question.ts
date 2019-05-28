@@ -1,5 +1,6 @@
 import * as Mongoose from 'mongoose';
 import {IChoiceModel} from './Choice';
+import {ISessionAnswerModel} from './SessionAnswer';
 
 export interface IQuestionModel extends Mongoose.Document
 {
@@ -15,6 +16,7 @@ export interface IQuestionModel extends Mongoose.Document
 	deleted			: Date;
 
 	choices			?: Array<IChoiceModel>;
+	answers			?: Array<ISessionAnswerModel>;
 }
 
 export const QuestionSchema: Mongoose.Schema = new Mongoose.Schema(

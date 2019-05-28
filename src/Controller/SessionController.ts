@@ -9,6 +9,8 @@ import {Event} from '../Http/Event';
 import {Device} from '../Http/Device';
 import {SessionHandler} from '../Session/SessionHandler';
 import {Session, ISessionModel} from '../Model/Session';
+import {SessionAnswer, ISessionAnswerModel} from '../Model/SessionAnswer';
+import {Contact, IContactModel} from '../Model/Contact';
 
 import {Validator, ValidationError, ObjectRule, StringRule, BooleanRule} from '@aeres-games/validator';
 
@@ -109,6 +111,13 @@ export class SessionController extends Controller
 
 				Choice.find({questionId: {$in: Object.keys(choiceQuestions)}, deleted: null}, function(error, choices: Array<IChoiceModel>)
 				{
+					if(error)
+					{
+						action.response(new Response(500, {error: 'Internal Server Error'}));
+						that.emit('warn', {message: 'Error starting questionnaire', error});
+						return;
+					}
+
 					for(let choice of choices)
 						choiceQuestions[choice.questionId].choices.push(choice);
 
@@ -294,7 +303,145 @@ export class SessionController extends Controller
 				return;
 			}
 
-			//TODO
+			if(session === null)
+			{
+				action.response(new Response(404, {error: 'Session Not Found'}));
+				return;
+			}
+
+			Questionnaire.findOne({_id: session.questionnaireId, userId: request.bridge.user._id}, function(error, questionnaire: IQuestionnaireModel)
+			{
+				if(error)
+				{
+					action.response(new Response(500, {error: 'Internal Server Error'}));
+					that.emit('warn', {message: 'Error getting session', error});
+					return;
+				}
+
+				if(questionnaire === null)
+				{
+					action.response(new Response(404, {error: 'Questionnaire Not Found'}));
+					return;
+				}
+
+				Question.find({questionnaireId: questionnaire.id}, function(error, questions: Array<IQuestionModel>)
+				{
+					if(error)
+					{
+						action.response(new Response(500, {error: 'Internal Server Error'}));
+						that.emit('warn', {message: 'Error getting session', error});
+						return;
+					}
+
+					questionnaire.questions = questions;
+					let choiceQuestions: {[id: string]: IQuestionModel | undefined} = {};
+
+					for(let question of questions)
+					{
+						if(question.type === 'choice')
+						{
+							choiceQuestions[question.id] = question;
+							question.choices = [];
+						}
+					}
+
+					Choice.find({questionId: {$in: Object.keys(choiceQuestions)}}, function(error, choices: Array<IChoiceModel>)
+					{
+						if(error)
+						{
+							action.response(new Response(500, {error: 'Internal Server Error'}));
+							that.emit('warn', {message: 'Error getting session', error});
+							return;
+						}
+
+						for(let choice of choices)
+							choiceQuestions[choice.questionId].choices.push(choice);
+
+						SessionAnswer.find({sessionId: session.id}, function(error, answers: Array<ISessionAnswerModel>)
+						{
+							if(error)
+							{
+								action.response(new Response(500, {error: 'Internal Server Error'}));
+								that.emit('warn', {message: 'Error getting session', error});
+								return;
+							}
+
+							let contactIds: Array<string> = [];
+
+							for(let answer of answers)
+							{
+								contactIds.push(answer.contactId);
+
+								for(let question of questions)
+								{
+									if(answer.questionId === question.id)
+									{
+										if(!question.answers)
+											question.answers = [];
+
+										question.answers.push(answer);
+										break;
+									}
+								}
+							}
+
+							Contact.find({_id: {$in: contactIds}}, function(error, contacts: Array<IContactModel>)
+							{
+								if(error)
+								{
+									action.response(new Response(500, {error: 'Internal Server Error'}));
+									that.emit('warn', {message: 'Error getting session', error});
+									return;
+								}
+
+								for(let answer of answers)
+								{
+									for(let contact of contacts)
+									{
+										if(contact.id === answer.contactId)
+										{
+											answer.contact = contact;
+											break;
+										}
+									}
+								}
+
+								let questionnaireData = questionnaire.toJSON();
+								questionnaireData.questions = [];
+
+								for(let question of questionnaire.questions)
+								{
+									if(!question.answers)
+										continue;
+
+									let questionData = question.toJSON();
+									questionData.answers = [];
+
+									if(question.type === 'choice')
+									{
+										questionData.choices = [];
+
+										for(let choice of question.choices)
+											questionData.choices.push(choice.toJSON());
+									}
+
+									for(let answer of question.answers)
+									{
+										let answerData = answer.toJSON();
+										answerData.phone = answer.contact.phone;
+
+										questionData.answers.push(answerData);
+									}
+
+									questionnaireData.questions.push(questionData);
+								}
+
+								action.response(new Response(200, {questionnaire: questionnaireData}));
+							});
+						});
+					});
+				});
+			});
 		
 			return;
 		});

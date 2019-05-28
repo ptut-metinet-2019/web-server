@@ -1,4 +1,5 @@
 import * as Mongoose from 'mongoose';
+import {IContactModel} from './Contact';
 
 export interface ISessionAnswerModel extends Mongoose.Document
 {
@@ -11,6 +12,8 @@ export interface ISessionAnswerModel extends Mongoose.Document
 	created		: Date;
 	updated		: Date;
 	deleted		: Date;
+
+	contact		?: IContactModel;
 }
 
 export const SessionAnswerSchema: Mongoose.Schema = new Mongoose.Schema(
