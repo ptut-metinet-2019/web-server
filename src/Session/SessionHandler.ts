@@ -65,6 +65,8 @@ export class SessionHandler extends EventEmitter
 					for(let answer of that.answers)
 						answer.sessionId = session.id;
 
+					console.log(that.answers);
+
 					SessionAnswer.insertMany(that.answers, {}, function(error, answers: Array<ISessionAnswerModel>)
 					{
 						if(error)

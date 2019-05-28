@@ -62,7 +62,7 @@ export class SessionQuestionHandler extends EventEmitter
 					}
 
 					answer = new SessionAnswer({
-						questionId: that.question._id,
+						questionId: that.question.id,
 						contactId: contact.id,
 						choiceId: that.question.choices[choicePos - 1].id,
 						answer: data.answer
@@ -71,7 +71,7 @@ export class SessionQuestionHandler extends EventEmitter
 				else
 				{
 					answer = new SessionAnswer({
-						questionId: that.question._id,
+						questionId: that.question.id,
 						contactId: contact.id,
 						answer: data.answer
 					});
