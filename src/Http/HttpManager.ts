@@ -104,6 +104,12 @@ export class HttpManager extends EventEmitter
 		if(this.server === null)
 			return;
 
+		for(let bridge of Object.values(this.bridges))
+		{
+			if(bridge.sessionHandler)
+				bridge.sessionHandler.stop();
+		}
+
 		this.wss.close(function()
 		{
 			that.wss = null;
