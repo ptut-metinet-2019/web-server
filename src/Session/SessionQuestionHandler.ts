@@ -56,7 +56,10 @@ export class SessionQuestionHandler extends EventEmitter
 					let choicePos = parseInt(data.answer);
 
 					if(isNaN(choicePos) || choicePos < 1 || choicePos > that.question.choices.length)
+					{
+						that.emit('info', {message: 'Session Question #' + number + ' received invalid choice "' + data.answer + '"'});
 						return;
+					}
 
 					answer = new SessionAnswer({
 						questionId: that.question._id,
@@ -76,6 +79,7 @@ export class SessionQuestionHandler extends EventEmitter
 
 				that.answers.push(answer);
 				that.handler.bridge.broadcast(new Event('session', 'answer', {answer: answer.answer, choiceId: answer.choiceId || null}));
+				that.emit('info', {message: 'Session Question #' + number + ' received answer "' + data.answer + '"'});
 			});
 		});
 
