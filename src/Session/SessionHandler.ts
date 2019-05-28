@@ -56,7 +56,11 @@ export class SessionHandler extends EventEmitter
 				let session = new Session({questionnaireId: this.questionnaire.id, phone: this.fetcher.phoneNumber});
 				session.save(function(error, session: ISessionModel)
 				{
-					if(error) return;
+					if(error)
+					{
+						that.emit('error', {message: 'Couldn\'t save Session', error});
+						return;
+					}
 
 					for(let answer of that.answers)
 						answer.sessionId = session.id;
