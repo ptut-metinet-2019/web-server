@@ -440,6 +440,7 @@ export class SessionController extends Controller
 									questionnaireData.questions.push(questionData);
 								}
 
+								console.log(questionnaire);
 								action.response(new Response(200, {questionnaire: questionnaireData}));
 							});
 						});
