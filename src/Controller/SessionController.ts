@@ -176,6 +176,7 @@ export class SessionController extends Controller
 					request.bridge.sessionHandler.on('warn', (event: object) => that.emit('warn', event));
 					request.bridge.sessionHandler.on('error', (event: object) => that.emit('error', event));
 
+					that.emit('info', {message: 'Session initialized for Questionnaire titled "' + questionnaire.name + '" (User #' + questionnaire.userId + ')'});
 					action.broadcast(new Event('session', 'init', {questionnaire: questionnaireData, phoneNumber: fetcher.phoneNumber}));
 					action.response(new Response(204));
 				});

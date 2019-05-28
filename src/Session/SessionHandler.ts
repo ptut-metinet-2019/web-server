@@ -27,8 +27,6 @@ export class SessionHandler extends EventEmitter
 		this.bridge = bridge;
 		this.fetcher = fetcher;
 		this.questionnaire = questionnaire;
-
-		this.emit('info', {message: 'Session initialized for Questionnaire titled "' + questionnaire.name + '" (User #' + questionnaire.userId + ')'});
 	}
 
 	public start(): void
@@ -113,5 +111,7 @@ export class SessionHandler extends EventEmitter
 		this.questionHandler.on('info', (event: object) => that.emit('info', event));
 		this.questionHandler.on('warn', (event: object) => that.emit('warn', event));
 		this.questionHandler.on('error', (event: object) => that.emit('error', event));
+
+		this.emit('info', {message: 'Question #' + number + ' started on Session for Questionnaire titled "' + this.questionnaire.name + '"'});
 	}
 }

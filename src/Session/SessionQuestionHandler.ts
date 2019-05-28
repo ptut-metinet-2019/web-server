@@ -83,7 +83,6 @@ export class SessionQuestionHandler extends EventEmitter
 			});
 		});
 
-		this.emit('info', {message: 'Question #' + number + ' started on Session for Questionnaire titled "' + this.handler.questionnaire.name + '"'});
 		this.handler.bridge.broadcast(new Event('session', 'question-start', {questionId: this.question.id}));
 
 		let timer = this.question.timer === null ? this.handler.questionnaire.timer : this.question.timer;
