@@ -62,9 +62,6 @@ export class SessionHandler extends EventEmitter
 						return;
 					}
 
-					console.log(session);
-					console.log(that.answers);
-
 					for(let answer of that.answers)
 						answer.sessionId = session.id;
 

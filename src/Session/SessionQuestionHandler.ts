@@ -64,7 +64,7 @@ export class SessionQuestionHandler extends EventEmitter
 					answer = new SessionAnswer({
 						questionId: that.question._id,
 						contactId: contact.id,
-						choiceId: that.question.choices[choicePos - 1],
+						choiceId: that.question.choices[choicePos - 1].id,
 						answer: data.answer
 					});
 				}
