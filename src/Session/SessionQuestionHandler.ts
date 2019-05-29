@@ -49,7 +49,7 @@ export class SessionQuestionHandler extends EventEmitter
 
 			getContact(data.phone).then(function(contact: IContactModel)
 			{
-				let answer: any = null;
+				let answer: ISessionAnswerModel = null;
 
 				if(that.question.type === 'choice')
 				{
@@ -61,20 +61,20 @@ export class SessionQuestionHandler extends EventEmitter
 						return;
 					}
 
-					answer = {
+					answer = new SessionAnswer({
 						questionId: that.question.id,
 						contactId: contact.id,
 						choiceId: that.question.choices[choicePos - 1].id,
 						answer: data.answer
-					};
+					});
 				}
 				else
 				{
-					answer = {
+					answer = new SessionAnswer({
 						questionId: that.question.id,
 						contactId: contact.id,
 						answer: data.answer
-					};
+					});
 				}
 
 				that.answers.push(answer);
