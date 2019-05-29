@@ -328,7 +328,7 @@ export class SessionController extends Controller
 					return;
 				}
 
-				Question.find({questionnaireId: questionnaire.id}, function(error, questions: Array<IQuestionModel>)
+				Question.find({questionnaireId: questionnaire.id, deleted: null}, function(error, questions: Array<IQuestionModel>)
 				{
 					if(error)
 					{
@@ -349,7 +349,7 @@ export class SessionController extends Controller
 						}
 					}
 
-					Choice.find({questionId: {$in: Object.keys(choiceQuestions)}}, function(error, choices: Array<IChoiceModel>)
+					Choice.find({questionId: {$in: Object.keys(choiceQuestions)}, deleted: null}, function(error, choices: Array<IChoiceModel>)
 					{
 						if(error)
 						{
