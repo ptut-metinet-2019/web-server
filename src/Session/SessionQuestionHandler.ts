@@ -49,6 +49,10 @@ export class SessionQuestionHandler extends EventEmitter
 
 			getContact(data.phone).then(function(contact: IContactModel)
 			{
+				for(let a of that.answers)
+					if(a.contactId.toString() === contact.id)
+						return;
+
 				let answer: ISessionAnswerModel = null;
 
 				if(that.question.type === 'choice')
