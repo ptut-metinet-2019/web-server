@@ -23,7 +23,7 @@
     "bcrypt": "^3.0.5",
     "dotenv": "^7.0.0",
     "js-sha512": "^0.8.0",
-    "mongoose": "^5.4.21",
+    "mongoose": "^5.7.5",
     "ws": "^6.2.1"
   },
   "devDependencies": {
